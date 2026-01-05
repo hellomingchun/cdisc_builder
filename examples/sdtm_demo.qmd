@@ -1,0 +1,107 @@
+---
+title: "SDTM Generation Demo"
+format: html
+jupyter: python3
+---
+
+## Introduction
+
+This notebook demonstrates how to use the `cdisc_builder` package to convert CDISC ODM XML data into SDTM domain datasets.
+
+One of the key features of this package is the ability to use **custom configurations** defined directly in Python dictionaries, allowing for flexible, programmatic control over the mapping logic without needing to edit YAML files.
+
+## Setup
+
+First, ensure the package is installed:
+```bash
+pip install -e ..
+```
+
+## Step 1: Parse ODM XML
+
+We start by parsing the raw ODM XML file into a comprehensive "Long Format" CSV. This intermediate file flattens the hierarchical XML into a structure that is easier to process (one row per ItemData).
+
+```{python}
+import pandas as pd
+import os
+from cdisc_builder.odm import parse_odm_to_long_df
+
+# Paths
+xml_path = "../cdisc_odm_example_1.xml"  # Adjust path as needed
+input_csv = "odm_long.csv"
+output_dir = "output_datasets"
+
+# Create output directory if not exists
+os.makedirs(output_dir, exist_ok=True)
+
+# Parse XML -> DataFrame
+print(f"Parsing {xml_path}...")
+df_long = parse_odm_to_long_df(xml_path)
+
+# Save intermediate csv (required by the dataset generator)
+df_long.to_csv(input_csv, index=False)
+
+print(f"Intermediate data shape: {df_long.shape}")
+df_long.head()
+```
+
+## Step 2: Custom Configuration
+
+Instead of writing mapping rules in Python, we keep them in a separate folder.
+We have created a folder named `study_specs` containing `ND.yaml`.
+
+```{python}
+import os
+
+# Define config directory
+config_dir = "study_specs"
+
+print(f"Using configurations from: {os.path.abspath(config_dir)}")
+print("Files:", os.listdir(config_dir))
+```
+
+## Step 3: Generate SDTM Datasets
+
+We pass the `my_configs` folder path directly to the generator.
+
+```{python}
+from cdisc_builder.sdtm import create_sdtm_datasets
+
+print("Generating SDTM datasets...")
+create_sdtm_datasets(config_dir, input_csv, output_dir)
+print("Generation Complete.")
+```
+
+## Step 4: Verify Output
+
+Let's verify the generated Parquet files.
+
+```{python}
+# Load Generated DM
+dm_path = os.path.join(output_dir, "DM.parquet")
+if os.path.exists(dm_path):
+    df_dm = pd.read_parquet(dm_path)
+    print("\n--- Generated DM Dataset ---")
+    print(df_dm.head())
+else:
+    print("DM.parquet not found.")
+
+# Load Generated ND
+nd_path = os.path.join(output_dir, "ND.parquet")
+if os.path.exists(nd_path):
+    df_nd = pd.read_parquet(nd_path)
+    print("\n--- Generated ND (New Domain) Dataset ---")
+    print(df_nd.head())
+else:
+    print("ND.parquet not found.")
+```
+
+## Cleanup
+
+```{python}
+import shutil
+
+# internal cleanup if you want to keep directory clean
+# os.remove(input_csv)
+# shutil.rmtree(output_dir)
+```

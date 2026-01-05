@@ -1,0 +1,24 @@
+PE:
+  - formoid: "FORM.VITPHYEX"
+    columns:
+      STUDYID: 
+        source: "StudyOID"
+        type: "str"
+      DOMAIN: 
+        literal: "PE"
+        type: "str"
+      USUBJID: 
+        source: "SubjectKey"
+        type: "str"
+      PESEQ: 
+        source: "ItemGroupRepeatKey"
+        type: "int"
+      PETESTCD: 
+        source: "IT.BODY_SYS"
+        type: "str"
+      PEORRES: 
+        source: "IT.ABNORM"
+        type: "str" 
+      PECOMM: 
+        source: "IT.COMMT1"
+        type: "str"

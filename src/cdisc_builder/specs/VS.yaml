@@ -1,0 +1,74 @@
+VS:
+  type: FINDINGS
+  definitions:
+    forms: &vs_forms
+      - "FORM.DEMOG"
+    items: &vs_items
+      - "IT.HT"
+      - "IT.WT"
+
+  columns:
+    - name: STUDYID
+      label: "Study Identifier"
+      type: str
+      source: StudyOID
+    - name: DOMAIN
+      label: "Domain Abbreviation"
+      literal: VS
+      type: str
+    - name: USUBJID
+      label: "Unique Subject Identifier"
+      type: str
+    - name: VSSEQ
+      label: "Sequence Number"
+      type: int
+
+    - name: VSTESTCD
+      label: "Vital Signs Test Short Name"
+      type: str
+      function: extract_value
+      formoid: *vs_forms
+      itemoid: *vs_items
+
+    - name: VSTEST
+      label: "Vital Signs Test Name"
+      type: str
+
+    - name: VSORRES
+      label: "Result or Finding in Original Units"
+      type: str
+      function: extract_value
+      formoid: *vs_forms
+      itemoid: *vs_items
+      
+    - name: VSORRESU
+      label: "Original Units"
+      type: str
+      function: extract_value
+      formoid: *vs_forms
+      itemoid: 
+        - "IT.HTUNITS"
+        - "IT.WTUNITS"
+
+    - name: VSSTRESC
+      label: "Character Result/Finding in Std Format"
+      type: str
+
+    - name: VSSTRESN
+      label: "Numeric Result/Finding in Std Format"
+      type: float
+      function: extract_value
+      formoid: *vs_forms
+      itemoid: *vs_items
+
+    - name: VSSTRESU
+      label: "Standard Units"
+      type: str
+
+    - name: VSDTC
+      label: "Date/Time of Collection"
+      type: str
+
+    - name: VSEXTPT
+      label: "Extraction Point"
+      type: str

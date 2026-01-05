@@ -1,0 +1,39 @@
+AE:
+  - formoid: "FORM.AE"
+    columns:
+      STUDYID: 
+        source: "StudyOID"
+        type: "str"
+      DOMAIN: 
+        literal: "AE"
+        type: "str"
+      USUBJID: 
+        source: "SubjectKey"
+        type: "str"
+      AESEQ: 
+        source: "ItemGroupRepeatKey"
+        type: "int"
+      AETERM: 
+        source: "IT.AETERM"
+        type: "str"
+      AESTDTC: 
+        source: "IT.AESTDT"
+        type: "str"
+      AEENDTC: 
+        source: "IT.AEENDT"
+        type: "str"
+      AESEV: 
+        source: "IT.AESEV"
+        type: "int"
+      AEREL: 
+        source: "IT.AEREL"
+        type: "str"
+      AEOUT: 
+        source: "IT.AEOUT"
+        type: "str"
+      AEACN: 
+        source: "IT.AEACTTRT"
+        type: "str"
+        value_mapping:
+            "0": "None"
+            "1": "Dose Reduced"

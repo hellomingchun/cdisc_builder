@@ -1,0 +1,47 @@
+version: "1.0"
+definitions:
+  column_general:
+    type: dict
+    properties:
+      source: {type: str}
+      literal: {type: [str, int, float, bool]}
+      type: {type: str, enum: [str, int, float, bool]}
+      max_missing_pct: {type: [int, float]}
+      value_mapping: {type: dict}
+
+  column_findings:
+    type: dict
+    required: [name]
+    properties:
+      name: {type: str}
+      label: {type: str}
+      type: {type: str}
+      literal: {type: [str, int, float, bool]}
+      source: {type: str}
+      function: {type: str}
+      formoid: {type: [str, list]}
+      itemoid: {type: [str, list]}
+      value_mapping: {type: dict}
+
+schemas:
+  general_domain:
+    type: list
+    item_schema:
+      type: dict
+      required: [formoid, columns]
+      properties:
+        formoid: {type: str}
+        keys: {type: list}
+        columns:
+          type: dict
+          values_schema: {ref: column_general}
+
+  findings_domain:
+    type: dict
+    required: [type, columns]
+    properties:
+      type: {const: FINDINGS}
+      definitions: {type: dict} # YAML Anchors container
+      columns:
+        type: list
+        item_schema: {ref: column_findings}

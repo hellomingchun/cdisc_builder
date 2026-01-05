@@ -1,0 +1,129 @@
+FA:
+  type: FINDINGS
+  
+  # Definitions / Anchors
+  # These keys are not read by the processor but hold the anchors
+  definitions:
+    forms: &fa_forms
+      - "FORM.AE"
+      - "FORM.PHARMVIT"
+      - "FORM.DRUGPHRM"
+    items: &fa_items
+      - "IT.AESEV"
+      - "IT.AEREL"
+      - "IT.AEOUT"
+      - "IT.PKMON0"
+      - "IT.PKMON1"
+      - "IT.TAREA"
+
+  columns:
+    - name: STUDYID
+      label: "Study Identifier"
+      type: str
+      source: StudyOID
+    - name: DOMAIN
+      label: "Domain Abbreviation"
+      literal: FA
+      type: str
+    - name: USUBJID
+      label: "Unique Subject Identifier"
+      type: str
+    - name: FASEQ
+      label: "Sequence Number"
+      type: int
+
+    - name: FATESTCD
+      label: "Findings Test Short Name"
+      type: str
+      function: extract_value
+      formoid: *fa_forms
+      itemoid: *fa_items
+
+    - name: FAOBJ
+      label: "Object of the Observation"
+      type: str
+
+    - name: FATEST
+      label: "Findings Test Name"
+      type: str
+
+    - name: FAORRES
+      label: "Result or Finding in Original Units"
+      type: str
+      function: extract_value
+      formoid: *fa_forms
+      itemoid: *fa_items
+
+    - name: FAORRESC
+      label: "Result or Finding in Orig Units - Char"
+      type: str
+      function: extract_value
+      formoid: *fa_forms
+      itemoid: *fa_items
+
+    - name: FAORRESN
+      label: "Result or Finding in Orig Units - Num"
+      type: float
+      function: extract_value
+      formoid: *fa_forms
+      itemoid: *fa_items
+
+    - name: FAORRESU
+      label: "Original Units"
+      type: str
+
+    - name: FASTRESC
+      label: "Character Result/Finding in Std Format"
+      type: str
+      function: extract_value
+      formoid: *fa_forms
+      itemoid: *fa_items
+
+    - name: FASTRESN
+      label: "Numeric Result/Finding in Std Format"
+      type: float
+      function: extract_value
+      formoid: *fa_forms
+      itemoid: *fa_items
+
+    - name: FASTRESU
+      label: "Standard Units"
+      type: str
+
+    - name: FASTAT
+      label: "Completion Status"
+      type: str
+
+    - name: FAREASND
+      label: "Reason Not Done"
+      type: str
+
+    - name: FALOC
+      label: "Location of the Finding"
+      type: str
+    
+    - name: FALAT
+      label: "Laterality"
+      type: str
+    
+    - name: FADIR
+      label: "Directionality"
+      type: str
+    
+    - name: FAEVAL
+      label: "Evaluator"
+      type: str
+
+    - name: FADTC
+      label: "Date/Time of Collection"
+      type: str
+      function: func_fa
+      formoid: *fa_forms
+      itemoid: 
+        - "IT.AESTDT"
+        - "IT.STRT_DT"
+        - "IT.PK_DT0"
+
+    - name: FADY
+      label: "Study Day of Collection"
+      type: int

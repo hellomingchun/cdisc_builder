@@ -1,0 +1,41 @@
+DS:
+  type: FINDINGS
+  definitions:
+    forms: &ds_forms
+      - "FORM.VITPHYEX"
+    items: &ds_items
+      - "IT.F_STATUS"
+
+  columns:
+    - name: STUDYID
+      label: "Study Identifier"
+      type: str
+      source: StudyOID
+    - name: DOMAIN
+      label: "Domain Abbreviation"
+      literal: DS
+      type: str
+    - name: USUBJID
+      label: "Unique Subject Identifier"
+      type: str
+    - name: DSSEQ
+      label: "Sequence Number"
+      type: int
+
+    - name: DSTERM
+      label: "Reported Term for the Disposition Event"
+      type: str
+      function: extract_value
+      formoid: *ds_forms
+      itemoid: *ds_items
+
+    - name: DSDECOD
+      label: "Standardized Disposition Term"
+      type: str
+      function: extract_value
+      formoid: *ds_forms
+      itemoid: *ds_items
+      
+    - name: DSDTC
+      label: "Date/Time of Collection"
+      type: str
