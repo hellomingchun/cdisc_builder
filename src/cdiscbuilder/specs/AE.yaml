@@ -1,5 +1,5 @@
 AE:
-  - formoid: "FORM.AE"
+  - formoid: "F_AE_1"
     columns:
       STUDYID: 
         source: "StudyOID"
@@ -8,32 +8,17 @@ AE:
         literal: "AE"
         type: "str"
       USUBJID: 
-        source: "SubjectKey"
+        source: "StudySubjectID"
         type: "str"
       AESEQ: 
         source: "ItemGroupRepeatKey"
         type: "int"
       AETERM: 
-        source: "IT.AETERM"
+        source: "I_AE_TERM"
         type: "str"
       AESTDTC: 
-        source: "IT.AESTDT"
-        type: "str"
-      AEENDTC: 
-        source: "IT.AEENDT"
+        source: "I_AE_STARTDATE"
         type: "str"
       AESEV: 
-        source: "IT.AESEV"
-        type: "int"
-      AEREL: 
-        source: "IT.AEREL"
+        source: "I_AE_SEVERITY"
         type: "str"
-      AEOUT: 
-        source: "IT.AEOUT"
-        type: "str"
-      AEACN: 
-        source: "IT.AEACTTRT"
-        type: "str"
-        value_mapping:
-            "0": "None"
-            "1": "Dose Reduced"

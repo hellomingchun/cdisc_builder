@@ -1,6 +1,6 @@
 DM:
-  - formoid: "FORM.DEMOG"
-    keys: ["StudyOID", "SubjectKey"]
+  - formoid: "F_DEMOG_1"
+    keys: ["StudyOID", "SubjectKey", "StudySubjectID"]
     columns:
       STUDYID:
         source: "StudyOID"
@@ -9,28 +9,25 @@ DM:
         literal: "DM"
         type: "str"
       USUBJID: 
-        source: "SubjectKey"
+        source: "StudySubjectID"
         type: "str"
         max_missing_pct: 0
       SUBJID: 
         source: "SubjectKey"
         type: "str"
       SEX: 
-        source: "IT.SEX"
+        source: "I_DEMOG_SEX"
         type: "str"
         value_mapping:
           "F": "Female"
           "M": "Male"
       RACE: 
-        source: "IT.RACE"
+        source: "I_DEMOG_RACE"
         type: "str"
       COUNTRY: 
-        source: "IT.SCTRY"
-        type: "str"
-      ARMCD: 
-        source: "IT.R_DRUG"
+        literal: "USA"
         type: "str"
       AGE:
-        source: "IT.AGE"
+        source: "I_DEMOG_AGE"
         type: "int"
         max_missing_pct: 5

@@ -1,1 +1,1 @@
-keys: ["StudyOID", "SubjectKey", "ItemGroupRepeatKey"]
+keys: ["StudyOID", "SubjectKey", "StudySubjectID", "ItemGroupRepeatKey"]

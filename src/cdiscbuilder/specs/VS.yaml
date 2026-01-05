@@ -2,10 +2,12 @@ VS:
   type: FINDINGS
   definitions:
     forms: &vs_forms
-      - "FORM.DEMOG"
+      - "F_VS_1"
     items: &vs_items
-      - "IT.HT"
-      - "IT.WT"
+      - "I_VS_HEIGHT"
+      - "I_VS_WEIGHT"
+      - "I_VS_SYSBP"
+      - "I_VS_DIABP"
 
   columns:
     - name: STUDYID
@@ -19,6 +21,7 @@ VS:
     - name: USUBJID
       label: "Unique Subject Identifier"
       type: str
+      source: StudySubjectID
     - name: VSSEQ
       label: "Sequence Number"
       type: int
@@ -44,11 +47,8 @@ VS:
     - name: VSORRESU
       label: "Original Units"
       type: str
-      function: extract_value
-      formoid: *vs_forms
-      itemoid: 
-        - "IT.HTUNITS"
-        - "IT.WTUNITS"
+      # No units column in this XML snapshot, maybe hardcode or map?
+      literal: "" 
 
     - name: VSSTRESC
       label: "Character Result/Finding in Std Format"

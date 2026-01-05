@@ -29,10 +29,24 @@ def parse_odm_to_long_df(xml_file):
                 continue
             
             subject_key = subject_data.get('SubjectKey')
+            
+            # Helper to find namespaced attribute
+            def get_attrib(elem, partial_name):
+                # exact match
+                if partial_name in elem.attrib: return elem.attrib[partial_name]
+                # namespaced match (ends with }Name)
+                for k, v in elem.attrib.items():
+                    if k.endswith("}" + partial_name):
+                        return v
+                return None
+
+            # Extract explicit StudySubjectID (case insensitive check)
+            # Check StudySubjectID, studysubjectid (and namespaced versions)
+            study_subject_id = get_attrib(subject_data, 'StudySubjectID') or get_attrib(subject_data, 'studysubjectid')
+            
             if not subject_key:
                 # Fallback for systems using StudySubjectID (e.g. OpenClinica sometimes)
-                # Checking both CamelCase and lowercase as requested
-                subject_key = subject_data.get('StudySubjectID') or subject_data.get('studysubjectid')
+                subject_key = study_subject_id
             
             # SubjectData -> StudyEventData
             for study_event_data in subject_data:
@@ -67,6 +81,7 @@ def parse_odm_to_long_df(xml_file):
                             row = {
                                 'StudyOID': study_oid,
                                 'SubjectKey': subject_key,
+                                'StudySubjectID': study_subject_id,
                                 'StudyEventOID': study_event_oid,
                                 'FormOID': form_oid,
                                 'ItemGroupOID': item_group_oid,

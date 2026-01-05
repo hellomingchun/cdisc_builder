@@ -21,6 +21,10 @@ class FindingsProcessor:
     def process(self, domain_name, sources, df_long, default_keys):
         domain_dfs = []
         
+        # Normalize dict to list if single config
+        if isinstance(sources, dict):
+            sources = [sources]
+        
         for settings in sources:
             # Check for 'columns' list with functions (New Strategy)
             columns_cfg = settings.get('columns', [])
@@ -92,7 +96,7 @@ class FindingsProcessor:
                         # Or maybe standard 'source' mapping?
                         continue
                         
-                    if func_name == 'func_fa':
+                    if func_name in ['func_fa', 'extract_value']:
                         form_oids = col_def.get('formoid')
                         item_oids = col_def.get('itemoid')
                         
@@ -224,8 +228,10 @@ class FindingsProcessor:
                             elif name == 'STUDYID' and 'StudyOID' in keys:
                                  if 'StudyOID' in final_df.columns: 
                                      series = final_df['StudyOID']
-                            elif name == 'USUBJID' and 'SubjectKey' in keys:
-                                 if 'SubjectKey' in final_df.columns: 
+                            elif name == 'USUBJID':
+                                 if 'StudySubjectID' in final_df.columns:
+                                     series = final_df['StudySubjectID']
+                                 elif 'SubjectKey' in final_df.columns: 
                                      series = final_df['SubjectKey']
                             elif name == 'FASEQ' and 'ItemGroupRepeatKey' in keys:
                                  if 'ItemGroupRepeatKey' in final_df.columns: 
