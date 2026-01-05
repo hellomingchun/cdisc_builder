@@ -9,6 +9,7 @@ AE:
         type: "str"
       USUBJID: 
         source: "StudySubjectID"
+        prefix: "PPT-"
         type: "str"
       AESEQ: 
         source: "ItemGroupRepeatKey"

@@ -251,6 +251,11 @@ class FindingsProcessor:
                                 
                             if series is not None:
                                 final_df[name] = series
+                        
+                        # Apply Prefix
+                        prefix = col_def.get('prefix')
+                        if prefix and name in final_df.columns:
+                            final_df[name] = prefix + final_df[name].astype(str)
 
                         # Type Enforcement (Apply to ALL columns, whether func_fa or fallback)
                         if col_type == 'int':

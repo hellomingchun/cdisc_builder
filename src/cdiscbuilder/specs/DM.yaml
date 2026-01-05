@@ -10,10 +10,11 @@ DM:
         type: "str"
       USUBJID: 
         source: "StudySubjectID"
+        prefix: "PPT-"
         type: "str"
         max_missing_pct: 0
       SUBJID: 
-        source: "SubjectKey"
+        source: "StudySubjectID"
         type: "str"
       SEX: 
         source: "I_DEMOG_SEX"

@@ -76,6 +76,11 @@ class GeneralProcessor:
                 if value_map:
                     series = series.replace(value_map)
 
+                # Apply Prefix
+                prefix = col_config.get('prefix') if isinstance(col_config, dict) else None
+                if prefix:
+                    series = prefix + series.astype(str)
+
                 # Apply Type Conversion
                 if target_type:
                     try:

@@ -22,6 +22,7 @@ VS:
       label: "Unique Subject Identifier"
       type: str
       source: StudySubjectID
+      prefix: "PPT-"
     - name: VSSEQ
       label: "Sequence Number"
       type: int
