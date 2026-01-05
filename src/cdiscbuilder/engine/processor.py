@@ -21,7 +21,7 @@ def process_domain(domain_name, sources, df_long, default_keys, output_dir):
     
     processor = None
     if domain_type == 'FINDINGS':
-        package_root = os.path.dirname(os.path.dirname(__file__)) # src/cdisc_builder
+        package_root = os.path.dirname(os.path.dirname(__file__)) # src/cdiscbuilder
         metadata_path = os.path.join(package_root, "metadata", "test_codes.yaml")
         
         processor = FindingsProcessor(metadata_path)

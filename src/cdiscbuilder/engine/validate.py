@@ -3,7 +3,7 @@ import os
 
 def load_schema():
     # config_data is parallel to engine/
-    pkg_root = os.path.dirname(os.path.dirname(__file__)) # src/cdisc_builder
+    pkg_root = os.path.dirname(os.path.dirname(__file__)) # src/cdiscbuilder
     schema_path = os.path.join(pkg_root, "specs", "schema.yaml")
     
     if not os.path.exists(schema_path):

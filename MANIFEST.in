@@ -1,2 +1,2 @@
-include src/cdisc_builder/specs/*.yaml
-include src/cdisc_builder/metadata/*.yaml
+include src/cdiscbuilder/specs/*.yaml
+include src/cdiscbuilder/metadata/*.yaml

@@ -1,6 +1,6 @@
 # CDISC Builder
 
-**`cdisc-builder`** is a Python package designed to simplify the transformation of clinical trial data from **ODM (Operational Data Model)** XML format into **CDISC SDTM (Study Data Tabulation Model)** and **ADaM (Analysis Data Model)** datasets.
+**`cdiscbuilder`** is a Python package designed to simplify the transformation of clinical trial data from **ODM (Operational Data Model)** XML format into **CDISC SDTM (Study Data Tabulation Model)** and **ADaM (Analysis Data Model)** datasets.
 
 It provides a flexible, configuration-driven approach to data mapping, allowing users to define rules using simple YAML files or Python dictionaries without harcoding complex logic.
 
@@ -15,7 +15,7 @@ It provides a flexible, configuration-driven approach to data mapping, allowing 
 ## Installation
 
 ```bash
-pip install cdisc-builder
+pip install cdiscbuilder
 ```
 
 ## Quick Start
@@ -32,7 +32,7 @@ cdisc-sdtm --xml study_data.xml --output ./sdtm_data
 ### 2. Python API
 
 ```python
-from cdisc_builder.sdtm import create_sdtm_datasets
+from cdiscbuilder.sdtm import create_sdtm_datasets
 
 # Define paths
 xml_file = "study_data.xml"

@@ -6,7 +6,7 @@ jupyter: python3
 
 ## Introduction
 
-This notebook demonstrates how to use the `cdisc_builder` package to convert CDISC ODM XML data into SDTM domain datasets.
+This notebook demonstrates how to use the `cdiscbuilder` package to convert CDISC ODM XML data into SDTM domain datasets.
 
 One of the key features of this package is the ability to use **custom configurations** defined directly in Python dictionaries, allowing for flexible, programmatic control over the mapping logic without needing to edit YAML files.
 
@@ -24,7 +24,7 @@ We start by parsing the raw ODM XML file into a comprehensive "Long Format" CSV.
 ```{python}
 import pandas as pd
 import os
-from cdisc_builder.odm import parse_odm_to_long_df
+from cdiscbuilder.odm import parse_odm_to_long_df
 
 # Paths
 xml_path = "../cdisc_odm_example_1.xml"  # Adjust path as needed
@@ -65,7 +65,7 @@ print("Files:", os.listdir(config_dir))
 We pass the `my_configs` folder path directly to the generator.
 
 ```{python}
-from cdisc_builder.sdtm import create_sdtm_datasets
+from cdiscbuilder.sdtm import create_sdtm_datasets
 
 print("Generating SDTM datasets...")
 create_sdtm_datasets(config_dir, input_csv, output_dir)
