@@ -252,6 +252,35 @@ class FindingsProcessor:
                             if series is not None:
                                 final_df[name] = series
                         
+                        # Apply Substring (Parity with GeneralProcessor)
+                        sub_start = col_def.get('substring_start')
+                        sub_len = col_def.get('substring_length')
+                        if sub_start is not None and sub_len is not None and name in final_df.columns:
+                            final_df[name] = final_df[name].astype(str).str[sub_start : sub_start + sub_len]
+
+                        # Apply Value Mapping (Parity with GeneralProcessor)
+                        value_map = col_def.get('value_mapping')
+                        mapping_default = col_def.get('mapping_default')
+                        mapping_default_source = col_def.get('mapping_default_source')
+                        
+                        if value_map and name in final_df.columns:
+                            mapped_series = final_df[name].map(value_map)
+                            
+                            if mapping_default is not None:
+                                final_df[name] = mapped_series.fillna(mapping_default)
+                            elif mapping_default_source is not None:
+                                 fallback = None
+                                 if mapping_default_source in final_df.columns:
+                                     fallback = final_df[mapping_default_source]
+                                 
+                                 if fallback is not None:
+                                     final_df[name] = mapped_series.fillna(fallback)
+                                 else:
+                                     print(f"Warning: Default source '{mapping_default_source}' not found for findings '{name}'")
+                                     final_df[name] = mapped_series
+                            else:
+                                final_df[name] = final_df[name].replace(value_map)
+                        
                         # Apply Prefix
                         prefix = col_def.get('prefix')
                         if prefix and name in final_df.columns:

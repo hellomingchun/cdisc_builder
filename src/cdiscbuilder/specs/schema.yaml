@@ -8,6 +8,11 @@ definitions:
       type: {type: str, enum: [str, int, float, bool]}
       max_missing_pct: {type: [int, float]}
       value_mapping: {type: dict}
+      prefix: {type: str}
+      substring_start: {type: int}
+      substring_length: {type: int}
+      mapping_default: {type: [str, int, float, bool]}
+      mapping_default_source: {type: str}
 
   column_findings:
     type: dict
@@ -22,6 +27,11 @@ definitions:
       formoid: {type: [str, list]}
       itemoid: {type: [str, list]}
       value_mapping: {type: dict}
+      prefix: {type: str}
+      substring_start: {type: int}
+      substring_length: {type: int}
+      mapping_default: {type: [str, int, float, bool]}
+      mapping_default_source: {type: str}
 
 schemas:
   general_domain:

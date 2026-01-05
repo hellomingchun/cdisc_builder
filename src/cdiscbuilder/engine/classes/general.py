@@ -64,6 +64,8 @@ class GeneralProcessor:
                 elif source_expr:
                     if source_expr in pivoted.columns:
                         series = pivoted[source_expr].copy()
+                    elif source_expr in final_df.columns:
+                        series = final_df[source_expr].copy()
                     else:
                         # Source defined but not found.
                         print(f"Warning: Source column '{source_expr}' not found for '{domain_name}.{target_col}'. Filling with NaN.")
@@ -72,9 +74,46 @@ class GeneralProcessor:
                     print(f"Warning: No source or literal defined for '{domain_name}.{target_col}'. Filling with NaN.")
                     series = pd.Series([None] * len(pivoted))
                 
+                # Apply Substring Extraction (Before Value Mapping)
+                if isinstance(col_config, dict):
+                    sub_start = col_config.get('substring_start')
+                    sub_len = col_config.get('substring_length')
+                    if sub_start is not None and sub_len is not None:
+                        # Ensure series is string
+                        series = series.astype(str)
+                        # Slice 0-indexed or 1-indexed? Python is 0-indexed.
+                        # User said "position 3-5". If string is '1110023565' and target is '002',
+                        # indices are 3,4,5. So slice[3:6].
+                        # Let's assume user provides 0-based start index and length.
+                        series = series.str[sub_start : sub_start + sub_len]
+
                 # Apply Value Mapping
+                mapping_default = col_config.get('mapping_default') if isinstance(col_config, dict) else None
+                mapping_default_source = col_config.get('mapping_default_source') if isinstance(col_config, dict) else None
+
                 if value_map:
-                    series = series.replace(value_map)
+                    # Perform mapping (non-matches become NaN)
+                    mapped_series = series.map(value_map)
+                    
+                    if mapping_default is not None:
+                         # Strict mapping with default literal
+                         series = mapped_series.fillna(mapping_default)
+                    elif mapping_default_source is not None:
+                         # Strict mapping with default from another column
+                         fallback = None
+                         if mapping_default_source in final_df.columns:
+                             fallback = final_df[mapping_default_source]
+                         elif mapping_default_source in pivoted.columns:
+                             fallback = pivoted[mapping_default_source]
+                        
+                         if fallback is not None:
+                             series = mapped_series.fillna(fallback)
+                         else:
+                             print(f"Warning: Default source '{mapping_default_source}' not found for '{domain_name}.{target_col}'")
+                             series = mapped_series # Leave as NaN or original? mapped_series has NaNs.
+                    else:
+                         # Partial replacement (legacy: keep original values if not in map)
+                         series = series.replace(value_map)
 
                 # Apply Prefix
                 prefix = col_config.get('prefix') if isinstance(col_config, dict) else None

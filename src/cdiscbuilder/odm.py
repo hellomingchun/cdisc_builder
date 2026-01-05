@@ -33,7 +33,8 @@ def parse_odm_to_long_df(xml_file):
             # Helper to find namespaced attribute
             def get_attrib(elem, partial_name):
                 # exact match
-                if partial_name in elem.attrib: return elem.attrib[partial_name]
+                if partial_name in elem.attrib:
+                    return elem.attrib[partial_name]
                 # namespaced match (ends with }Name)
                 for k, v in elem.attrib.items():
                     if k.endswith("}" + partial_name):

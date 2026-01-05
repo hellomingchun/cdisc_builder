@@ -62,9 +62,40 @@ DM:
           AGE:
               source: IT.AGE
               type: int
-          SEX:
-              source: IT.SEX
               type: str
+          SEX:
+              source: I_DEMOG_SEX
+              type: str
+              value_mapping:
+                  "M": "Male"
+                  "F": "Female"
+
+### Advanced Mapping Features
+
+**Prefixing**:
+```yaml
+USUBJID:
+  source: StudySubjectID
+  prefix: "PPT-"
+```
+
+**Substring Extraction** (extracts chars 3-5 before mapping):
+```yaml
+SITEID:
+  source: FULL_ID
+  substring_start: 3
+  substring_length: 3
+```
+
+**Default Values**:
+```yaml
+CUSTOM_COL:
+  source: ORG_COL
+  value_mapping:
+    "A": "Alpha"
+  mapping_default: "Other" # used if not A
+  # mapping_default_source: "AnotherCol" # Fallback to column value
+```
 ```
 
 ## License
