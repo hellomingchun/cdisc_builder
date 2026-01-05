@@ -2,7 +2,6 @@ import yaml
 import os
 
 def load_schema():
-    current_dir = os.path.dirname(__file__)
     # config_data is parallel to engine/
     pkg_root = os.path.dirname(os.path.dirname(__file__)) # src/cdisc_builder
     schema_path = os.path.join(pkg_root, "specs", "schema.yaml")

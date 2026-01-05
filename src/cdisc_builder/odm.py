@@ -1,6 +1,5 @@
 import xml.etree.ElementTree as ET
 import pandas as pd
-import os
 
 def parse_odm_to_long_df(xml_file):
     tree = ET.parse(xml_file)

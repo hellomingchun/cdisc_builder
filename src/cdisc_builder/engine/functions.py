@@ -13,8 +13,10 @@ def extract_value(df_long, form_oids, item_oids, return_col='Value', keys=None):
         DataFrame containing Keys and the requested data column (renamed to 'Result' or similar).
     """
     # 1. Normalize inputs
-    if isinstance(form_oids, str): form_oids = [form_oids]
-    if isinstance(item_oids, str): item_oids = [item_oids]
+    if not isinstance(form_oids, list): 
+        form_oids = [form_oids] if form_oids else []
+    if isinstance(item_oids, str): 
+        item_oids = [item_oids]
     
     # 2. Filter Forms
     # Optimization: pre-filter df_long if passed repeatedly? 

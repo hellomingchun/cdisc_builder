@@ -44,7 +44,6 @@ class FindingsProcessor:
                 
                 config_keys = settings.get('keys', default_keys)
                 keys = config_keys # Alias for compatibility
-                params = settings.get('params', {})
                 
                 # Check if we should enforce FormOID joining
                 # If simplified config, we likely want strict form isolation.
@@ -52,8 +51,7 @@ class FindingsProcessor:
                 if 'FormOID' not in join_keys and 'FormOID' in df_long.columns:
                      join_keys.append('FormOID')
                 
-                # Store resulting dataframes
-                dfs_to_merge = [] 
+                # Store resulting dataframes 
                 
                 # To identify the "Backbone" (which determines the number of rows), we look for the list of items.
                 # Actually, with the Naive Merge strategy (Full Outer Join or Left Join on Main?), 
@@ -102,7 +100,8 @@ class FindingsProcessor:
                              pass # Removed Debug
                         
                         # Normalize to list
-                        if not isinstance(form_oids, list): form_oids = [form_oids] if form_oids else []
+                        if not isinstance(form_oids, list): 
+                            form_oids = [form_oids] if form_oids else []
                         col_type = col_def.get('type', 'str')
                          
                         # Determine return_col
@@ -112,7 +111,7 @@ class FindingsProcessor:
                             return_col = 'ItemOID'
                             
                 # Call function
-                        df_res = func_fa(df_long, form_oids, item_oids, return_col=return_col, keys=join_keys)
+                        df_res = extract_value(df_long, form_oids, item_oids, return_col=return_col, keys=join_keys)
 
                         # Removed Debug
                         
@@ -150,9 +149,9 @@ class FindingsProcessor:
                             # Or update func_fa to always return ItemOID?
                             # For FAORRES, we definitely need ItemOID to know which test it is.
                             
-                            # FIX for func_fa usage here:
+                            # FIX for extract_value usage here:
                             # We always ask for ItemOID as a key for merging.
-                            df_res_with_id = func_fa(df_long, form_oids, item_oids, return_col=return_col, keys=join_keys + ['ItemOID'])
+                            df_res_with_id = extract_value(df_long, form_oids, item_oids, return_col=return_col, keys=join_keys + ['ItemOID'])
                             
                             # Create target column instead of renaming, to preserve ItemOID key
                             # If return_col is 'ItemOID', it's the same column.
@@ -223,11 +222,14 @@ class FindingsProcessor:
                                  
                             # Defaults Logic (Legacy / Backup)
                             elif name == 'STUDYID' and 'StudyOID' in keys:
-                                 if 'StudyOID' in final_df.columns: series = final_df['StudyOID']
+                                 if 'StudyOID' in final_df.columns: 
+                                     series = final_df['StudyOID']
                             elif name == 'USUBJID' and 'SubjectKey' in keys:
-                                 if 'SubjectKey' in final_df.columns: series = final_df['SubjectKey']
+                                 if 'SubjectKey' in final_df.columns: 
+                                     series = final_df['SubjectKey']
                             elif name == 'FASEQ' and 'ItemGroupRepeatKey' in keys:
-                                 if 'ItemGroupRepeatKey' in final_df.columns: series = final_df['ItemGroupRepeatKey']
+                                 if 'ItemGroupRepeatKey' in final_df.columns: 
+                                     series = final_df['ItemGroupRepeatKey']
                             elif name == 'DOMAIN':
                                  series = pd.Series([domain_name] * len(final_df), index=final_df.index)
                                  

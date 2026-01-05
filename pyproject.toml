@@ -21,3 +21,7 @@ cdisc_builder = ["specs/*.yaml", "metadata/*.yaml", "engine/classes/*.py"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.mypy]
+ignore_missing_imports = true
+
