@@ -71,6 +71,33 @@ DM:
                   "M": "Male"
                   "F": "Female"
 
+```
+### Finding Domains (Dynamic Mapping)
+
+For domains like `IE`, `LB`, `FA` where many input items map to a single `Test Code` / `Test Name` pair, use `type: finding`.
+
+```yaml
+IE:
+  - type: finding
+    formoid: "F_ELIGIBILITY"
+    # Filter rows using Regex
+    item_group_regex: "IG_ELIGI_.*"
+    item_oid_regex: "I_ELIGI_.*"
+    
+    columns:
+      # Extract part of the OID for the Short Code
+      IETESTCD:
+        source: ItemOID
+        regex_extract: "I_ELIGI_(.*)"
+      
+      # Use Metadata from parsed XML for the Description
+      IETEST:
+        source: Metadata.Question
+      
+      IEORRES:
+        source: Value
+```
+
 ### Advanced Mapping Features
 
 **Prefixing**:

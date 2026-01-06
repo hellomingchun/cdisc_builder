@@ -3,7 +3,7 @@ import os
 from .classes.general import GeneralProcessor
 
 
-def process_domain(domain_name, sources, df_long, default_keys, output_dir):
+def process_domain(domain_name, sources, df_long, default_keys, output_dir, metadata=None):
     # Determine type of the first block (assumes all blocks in a domain are same type)
     # process_domain receives 'sources' which is settings_entry.
     
@@ -15,8 +15,15 @@ def process_domain(domain_name, sources, df_long, default_keys, output_dir):
         print(f"Warning: No configuration found for {domain_name}")
         return
 
-    # Always use GeneralProcessor
-    processor = GeneralProcessor()
+    from .classes.finding import FindingProcessor
+
+    # Check type of first source to decide processor
+    p_type = sources[0].get('type', 'general') if sources else 'general'
+
+    if p_type == 'finding':
+        processor = FindingProcessor(metadata)
+    else:
+        processor = GeneralProcessor()
 
     domain_dfs = processor.process(domain_name, sources, df_long, default_keys)
 

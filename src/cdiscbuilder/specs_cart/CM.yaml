@@ -1,0 +1,31 @@
+CM:
+  - formoid: "F_CONMED"
+    keys: ["StudyOID", "SubjectKey", "StudyEventOID", "StudyEventRepeatKey", "ItemGroupRepeatKey"]
+    columns:
+      STUDYID:
+        source: StudyOID
+        type: str
+      DOMAIN:
+        literal: CM
+        type: str
+      USUBJID:
+        source: SubjectKey
+        type: str
+      CMSEQ:
+        source: ItemGroupRepeatKey
+        type: int
+      CMTRT:
+        source: I_CONME_CMTRTL
+        type: str
+      CMDOSE:
+        source: I_CONME_CMDOSE
+        type: str
+      CMDOSU:
+        source: I_CONME_CMDOSU
+        type: str
+      CMDOSFRM:
+        source: I_CONME_CMDOSFRM
+        type: str
+      CMROUTE:
+        source: I_CONME_CMROUTE
+        type: str

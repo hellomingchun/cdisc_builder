@@ -1,0 +1,34 @@
+IE:
+  - formoid: "F_IE_1"
+    keys: ["StudyOID", "SubjectKey", "StudyEventOID", "StudyEventRepeatKey", "ItemGroupRepeatKey"]
+    columns:
+      STUDYID:
+        source: "StudyOID"
+        type: "str"
+      DOMAIN:
+        literal: "IE"
+        type: "str"
+      USUBJID:
+        source: "SubjectKey"
+        type: "str"
+      IESEQ:
+        source: "ItemGroupRepeatKey"
+        type: "int"
+      IETESTCD:
+        literal: ["INCL01", "EXCL01"]
+        type: "str"
+      IETEST:
+        literal: ["Age >= 18", "Pregnant"]
+        type: "str"
+      IECAT:
+        literal: ["INCLUSION", "EXCLUSION"]
+        type: "str"
+      IEORRES:
+        source: ["I_IE_INCL_01", "I_IE_EXCL_01"]
+        type: "str"
+      IESTRESC:
+        source: ["I_IE_INCL_01", "I_IE_EXCL_01"]
+        type: "str"
+      IEDTC:
+        source: "I_IE_DTC"
+        type: "str"

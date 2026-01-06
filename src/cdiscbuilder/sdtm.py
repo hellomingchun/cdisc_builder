@@ -2,7 +2,7 @@ import pandas as pd
 from .engine.config import load_config
 from .engine.processor import process_domain
 
-def create_sdtm_datasets(config_input, input_csv, output_dir):
+def create_sdtm_datasets(config_input, input_csv, output_dir, metadata=None):
     if isinstance(config_input, dict):
         config = config_input
         # We assume it's already structured correctly or validated
@@ -16,7 +16,7 @@ def create_sdtm_datasets(config_input, input_csv, output_dir):
     df_long = pd.read_csv(input_csv)
 
     for domain, settings_entry in config['domains'].items():
-        print(f"DEBUG: Configured Domain: {domain}")
+
         print(f"Processing domain: {domain}")
         
         # Normalize to list.
@@ -25,6 +25,6 @@ def create_sdtm_datasets(config_input, input_csv, output_dir):
         else:
             sources = [settings_entry]
             
-        process_domain(domain, sources, df_long, default_keys, output_dir)
+        process_domain(domain, sources, df_long, default_keys, output_dir, metadata)
 
 

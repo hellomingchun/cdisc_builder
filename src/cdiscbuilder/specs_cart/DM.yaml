@@ -1,0 +1,28 @@
+DM:
+  - formoid: "F_1DEMOGRAPHIC"
+    keys: ["StudyOID", "SubjectKey"]
+    columns:
+      STUDYID:
+        source: "StudyOID"
+        type: "str"
+      DOMAIN:
+        literal: "DM"
+        type: "str"
+      USUBJID:
+        source: "SubjectKey"
+        type: "str"
+      SUBJID:
+        source: "SubjectKey"
+        type: "str"
+      RFSTDTC:
+        source: "I_1DEMO_DATE"
+        type: "str"
+      BRTHDTC:
+        source: "I_1DEMO_DATE"
+        type: "str"
+      SEX:
+        source: "I_1DEMO_PTSEX"
+        type: "str"
+      RACE:
+        source: "I_1DEMO_PTRACE"
+        type: "str"

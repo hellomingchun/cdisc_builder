@@ -15,6 +15,7 @@ definitions:
       mapping_default_source: {type: str}
       dependency: {type: str}
       dependency_false_value: {type: [str, int, float, bool]}
+      regex_extract: {type: str}
 
   column_findings:
     type: dict
@@ -42,6 +43,9 @@ schemas:
       type: dict
       required: [formoid, columns]
       properties:
+        type: {type: str, enum: ["general", "finding"]}
+        item_group_regex: {type: str}
+        item_oid_regex: {type: str}
         formoid: {type: [str, list]}
         keys: {type: list}
         columns:

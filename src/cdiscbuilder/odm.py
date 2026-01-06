@@ -76,5 +76,34 @@ def parse_odm_to_long_df(xml_file):
                                                         'Value': value
                                                     })
 
+    metadata = {}
+    
+    # helper for metadata
+    def parse_metadata(root):
+        meta = {}
+        ns = {'odm': 'http://www.cdisc.org/ns/odm/v1.3'}
+        # Find MetaDataVersion - simplified lookup
+        for study in root.findall('odm:Study', ns):
+            for mdv in study.findall('odm:MetaDataVersion', ns):
+                for item_def in mdv.findall('odm:ItemDef', ns):
+                    oid = item_def.get('OID')
+                    name = item_def.get('Name')
+                    
+                    # Try to find Question/TranslatedText
+                    question = ""
+                    q_elem = item_def.find('odm:Question', ns)
+                    if q_elem is not None:
+                        tt_elem = q_elem.find('odm:TranslatedText', ns)
+                        if tt_elem is not None:
+                            question = tt_elem.text.strip() if tt_elem.text else ""
+                    
+                    meta[oid] = {
+                        'Name': name,
+                        'Question': question
+                    }
+        return meta
+
+    metadata = parse_metadata(root)
+
     df = pd.DataFrame(data_rows)
-    return df
+    return df, metadata

@@ -15,6 +15,15 @@
                         <ItemData ItemOID="I_IC_DATE" Value="2025-12-31"/>
                     </ItemGroupData>
                 </FormData>
+                <FormData FormOID="F_IE_1" OpenClinica:Status="complete">
+                    <ItemGroupData ItemGroupOID="IG_IE" ItemGroupRepeatKey="1">
+                         <!-- Inclusion 1: Age >= 18 -->
+                        <ItemData ItemOID="I_IE_INCL_01" Value="YES"/>
+                         <!-- Exclusion 1: Pregnant -->
+                        <ItemData ItemOID="I_IE_EXCL_01" Value="NO"/>
+                        <ItemData ItemOID="I_IE_DTC" Value="2025-12-31"/>
+                    </ItemGroupData>
+                </FormData>
             </StudyEventData>
 
             <!-- Baseline Visit -->

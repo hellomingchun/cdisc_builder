@@ -1,0 +1,34 @@
+AE:
+  - formoid: "F_ADVERSEEVENT"
+    keys: ["StudyOID", "SubjectKey", "StudyEventOID", "StudyEventRepeatKey", "ItemGroupRepeatKey"]
+    columns:
+      STUDYID:
+        source: StudyOID
+        type: str
+      DOMAIN:
+        literal: AE
+        type: str
+      USUBJID:
+        source: SubjectKey
+        type: str
+      AESEQ:
+        source: ItemGroupRepeatKey
+        type: int
+      AETERM:
+        source: I_ADVER_AETERM
+        type: str
+      AESTDTC:
+        source: I_ADVER_AESTDAT
+        type: str
+      AEENDTC:
+        source: I_ADVER_AEENDDAT
+        type: str
+      AESEV:
+        source: I_ADVER_AESEV
+        type: str
+      AEOUT:
+        source: I_ADVER_AEOUT
+        type: str
+      AEREL:
+        source: I_ADVER_AEREL
+        type: str
