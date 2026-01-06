@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 from .classes.general import GeneralProcessor
-from .classes.findings import FindingsProcessor
+
 
 def process_domain(domain_name, sources, df_long, default_keys, output_dir):
     # Determine type of the first block (assumes all blocks in a domain are same type)
@@ -15,18 +15,8 @@ def process_domain(domain_name, sources, df_long, default_keys, output_dir):
         print(f"Warning: No configuration found for {domain_name}")
         return
 
-    # Determine type from the first block
-    first_block = sources[0]
-    domain_type = first_block.get('type', "GENERAL")
-    
-    processor = None
-    if domain_type == 'FINDINGS':
-        package_root = os.path.dirname(os.path.dirname(__file__)) # src/cdiscbuilder
-        metadata_path = os.path.join(package_root, "metadata", "test_codes.yaml")
-        
-        processor = FindingsProcessor(metadata_path)
-    else:
-        processor = GeneralProcessor()
+    # Always use GeneralProcessor
+    processor = GeneralProcessor()
 
     domain_dfs = processor.process(domain_name, sources, df_long, default_keys)
 

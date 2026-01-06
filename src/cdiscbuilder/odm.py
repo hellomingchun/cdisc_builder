@@ -2,97 +2,79 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 
 def parse_odm_to_long_df(xml_file):
-    tree = ET.parse(xml_file)
-    root = tree.getroot()
+    try:
+        tree = ET.parse(xml_file)
+        root = tree.getroot()
+    except Exception as e:
+        print(f"Error parsing XML file {xml_file}: {e}")
+        return pd.DataFrame()
 
     data_rows = []
 
-    # Helper to clean tag
     def get_local_name(tag):
         if '}' in tag:
             return tag.split('}', 1)[1]
         return tag
 
-    # Recurse strictly based on ODM hierarchy
-    # ODM -> ClinicalData
-    
-    # We iterate direct children of root to find ClinicalData
-    for clinical_data in root:
-        if get_local_name(clinical_data.tag) != 'ClinicalData':
-            continue
-        
-        study_oid = clinical_data.get('StudyOID')
-        
-        # ClinicalData -> SubjectData
-        for subject_data in clinical_data:
-            if get_local_name(subject_data.tag) != 'SubjectData':
-                continue
-            
-            subject_key = subject_data.get('SubjectKey')
-            
-            # Helper to find namespaced attribute
-            def get_attrib(elem, partial_name):
-                # exact match
-                if partial_name in elem.attrib:
-                    return elem.attrib[partial_name]
-                # namespaced match (ends with }Name)
-                for k, v in elem.attrib.items():
-                    if k.endswith("}" + partial_name):
-                        return v
-                return None
+    for cd in root:
+        if get_local_name(cd.tag) == 'ClinicalData':
+            study_oid = cd.get('StudyOID')
+            for sd in cd:
+                if get_local_name(sd.tag) == 'SubjectData':
+                    subject_key = sd.get('SubjectKey')
+                    
+                    # Helper for attributes
+                    def get_attrib(elem, partial_name):
+                        if partial_name in elem.attrib:
+                            return elem.attrib[partial_name]
+                        for k, v in elem.attrib.items():
+                            if k.endswith("}" + partial_name):
+                                return v
+                        return None
 
-            # Extract explicit StudySubjectID (case insensitive check)
-            # Check StudySubjectID, studysubjectid (and namespaced versions)
-            study_subject_id = get_attrib(subject_data, 'StudySubjectID') or get_attrib(subject_data, 'studysubjectid')
-            
-            if not subject_key:
-                # Fallback for systems using StudySubjectID (e.g. OpenClinica sometimes)
-                subject_key = study_subject_id
-            
-            # SubjectData -> StudyEventData
-            for study_event_data in subject_data:
-                if get_local_name(study_event_data.tag) != 'StudyEventData':
-                    continue
-                
-                study_event_oid = study_event_data.get('StudyEventOID')
-                
-                # StudyEventData -> FormData
-                for form_data in study_event_data:
-                    if get_local_name(form_data.tag) != 'FormData':
-                        continue
-                    
-                    form_oid = form_data.get('FormOID')
-                    
-                    # FormData -> ItemGroupData
-                    for item_group_data in form_data:
-                        if get_local_name(item_group_data.tag) != 'ItemGroupData':
-                            continue
-                        
-                        item_group_oid = item_group_data.get('ItemGroupOID')
-                        item_group_repeat_key = item_group_data.get('ItemGroupRepeatKey')
-                        
-                        # ItemGroupData -> ItemData
-                        for item_data in item_group_data:
-                            if get_local_name(item_data.tag) != 'ItemData':
-                                continue
+                    study_subject_id = get_attrib(sd, 'StudySubjectID') or get_attrib(sd, 'studysubjectid')
+                    if not subject_key:
+                        subject_key = study_subject_id
+
+                    for child in sd:
+                        tag = get_local_name(child.tag)
+                        if tag == 'StudyEventData':
+                            study_event_oid = child.get('StudyEventOID')
+                            study_event_repeat_key = child.get('StudyEventRepeatKey')
                             
-                            item_oid = item_data.get('ItemOID')
-                            value = item_data.get('Value')
+                            # Extract Namespaced StartDate
+                            start_date = get_attrib(child, 'StartDate')
                             
-                            row = {
-                                'StudyOID': study_oid,
-                                'SubjectKey': subject_key,
-                                'StudySubjectID': study_subject_id,
-                                'StudyEventOID': study_event_oid,
-                                'FormOID': form_oid,
-                                'ItemGroupOID': item_group_oid,
-                                'ItemGroupRepeatKey': item_group_repeat_key,
-                                'ItemOID': item_oid,
-                                'Value': value
-                            }
-                            data_rows.append(row)
+                            for form in child:
+                                f_tag = get_local_name(form.tag)
+                                if f_tag == 'FormData':
+                                    form_oid = form.get('FormOID')
+                                    
+                                    for ig in form:
+                                        ig_tag = get_local_name(ig.tag)
+                                        if ig_tag == 'ItemGroupData':
+                                            item_group_oid = ig.get('ItemGroupOID')
+                                            item_group_repeat_key = ig.get('ItemGroupRepeatKey')
+                                            
+                                            for item in ig:
+                                                i_tag = get_local_name(item.tag)
+                                                if i_tag == 'ItemData':
+                                                    item_oid = item.get('ItemOID')
+                                                    value = item.get('Value')
+                                                    
+                                                    data_rows.append({
+                                                        'StudyOID': study_oid,
+                                                        'SubjectKey': subject_key,
+                                                        'StudySubjectID': study_subject_id,
+                                                        'StudyEventOID': study_event_oid,
+                                                        'StudyEventRepeatKey': study_event_repeat_key,
+                                                        'StudyEventStartDate': start_date,
+                                                        'FormOID': form_oid,
+                                                        'ItemGroupOID': item_group_oid,
+                                                        'ItemGroupRepeatKey': item_group_repeat_key,
+                                                        'ItemOID': item_oid,
+                                                        'Value': value
+                                                    })
 
     df = pd.DataFrame(data_rows)
     return df
-
-

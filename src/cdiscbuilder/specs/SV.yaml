@@ -1,42 +1,23 @@
 SV:
-  type: FINDINGS
-  definitions:
-    forms: &sv_forms
-      - "FORM.VITPHYEX"  # Using Vitals as a proxy for Visit existence
-    items: &sv_items
-     - "IT.REC_ID"       # Dummy item just to trigger row generation
-
-  columns:
-    - name: STUDYID
-      label: "Study Identifier"
-      type: str
-      source: StudyOID
-    - name: DOMAIN
-      label: "Domain Abbreviation"
-      literal: SV
-      type: str
-    - name: USUBJID
-      label: "Unique Subject Identifier"
-      type: str
-    - name: VISITNUM
-      label: "Visit Number"
-      type: float
-      # We don't have explicit visit num.
-      
-    - name: VISIT
-      label: "Visit Name"
-      type: str
-      function: extract_value
-      formoid: *sv_forms
-      itemoid: *sv_items
-      source: StudyEventOID # Overwrites func_fa result
-      
-    - name: SVSTDTC
-      label: "Start Date/Time of Observation"
-      type: str
-      # Left empty as we have no generic visit date
-      
-    - name: SVENDTC
-      label: "End Date/Time of Observation"
-      type: str
-      # Left empty
+  # Compact SV: Trigger on any of these forms effectively finding all Visits
+  - formoid: ["F_DEMOG_1", "F_VS_1", "F_DISP_1", "F_LAB_1"]
+    
+    # Group by Event (Visit), ignoring which specific Form triggered it
+    keys: ["StudyOID", "SubjectKey", "StudyEventOID", "StudyEventRepeatKey"]
+    
+    columns:
+      STUDYID:
+        source: "StudyOID"
+        type: "str"
+      DOMAIN:
+        literal: "SV"
+        type: "str"
+      USUBJID:
+        source: "SubjectKey"
+        type: "str"
+      VISIT:
+        source: "StudyEventOID"
+        type: "str"
+      SVSTDTC:
+        source: "StudyEventStartDate"
+        type: "str"

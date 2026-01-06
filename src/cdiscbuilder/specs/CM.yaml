@@ -1,55 +1,25 @@
 CM:
-  - formoid: "FORM.CONMED"
+  - formoid: "F_CM_1"
+    keys: ["StudyOID", "SubjectKey", "StudyEventOID", "StudyEventRepeatKey", "ItemGroupRepeatKey"]
     columns:
-      STUDYID: 
+      STUDYID:
         source: "StudyOID"
         type: "str"
-      DOMAIN: 
+      DOMAIN:
         literal: "CM"
         type: "str"
-      USUBJID: 
+      USUBJID:
         source: "SubjectKey"
         type: "str"
-      CMSEQ: 
+      CMSEQ:
         source: "ItemGroupRepeatKey"
         type: "int"
-      CMTRT: 
-        source: "IT.MEDIC"
+      CMTRT:
+        source: "I_CM_TERM"
         type: "str"
-      CMINDC: 
-        source: "IT.INDIC"
-        type: "str"
-      CMSTDTC: 
-        source: "IT.STRT_DT"
-        type: "str"
-      CMENDTC: 
-        source: "IT.STOP_DT"
-        type: "str"
-      CMDOSU: 
-        source: "IT.DOSEUNIT"
-        type: "str"
-      CMROUTE: 
-        source: "IT.ROUTE"
-        type: "str"
-  
-  # Second source for CM: Physical Exam comments
-  - formoid: "FORM.VITPHYEX" 
-    columns:
-      STUDYID: 
-        source: "StudyOID"
-        type: "str"
-      DOMAIN: 
-        literal: "CM"
-        type: "str"
-      USUBJID: 
-        source: "SubjectKey"
-        type: "str"
-      CMSEQ: 
-        source: "ItemGroupRepeatKey"
-        type: "int"
-      CMTRT: 
-        source: "IT.COMMT1" # Mapping comment to treatment
-        type: "str"
-      CMINDC: 
-        literal: "Physical Exam Finding" # Hardcoded
+      CMDOSE:
+        source: "I_CM_DOSE"
+        type: "float"
+      CMDOSEU:
+        source: "I_CM_UNIT"
         type: "str"

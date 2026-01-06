@@ -26,6 +26,28 @@
                 </FormData>
             </StudyEventData>
             
+            <!-- Concomitant Medications -->
+            <StudyEventData StudyEventOID="SE_CONMED" OpenClinica:StartDate="2026-01-01" StudyEventRepeatKey="1">
+                <FormData FormOID="F_CM_1" OpenClinica:Status="complete">
+                    <ItemGroupData ItemGroupOID="IG_CM" ItemGroupRepeatKey="1">
+                        <ItemData ItemOID="I_CM_TERM" Value="ASPIRIN"/>
+                        <ItemData ItemOID="I_CM_DOSE" Value="81"/>
+                        <ItemData ItemOID="I_CM_UNIT" Value="mg"/>
+                    </ItemGroupData>
+                </FormData>
+            </StudyEventData>
+            
+            <!-- Disposition -->
+            <StudyEventData StudyEventOID="SE_TERM" OpenClinica:StartDate="2026-06-01" StudyEventRepeatKey="1">
+                <FormData FormOID="F_DISP_1" OpenClinica:Status="complete">
+                    <ItemGroupData ItemGroupOID="IG_DISP" ItemGroupRepeatKey="1">
+                        <ItemData ItemOID="I_DISP_TERM" Value="COMPLETED"/>
+                        <ItemData ItemOID="I_DISP_DECOD" Value="COMPLETED"/>
+                        <ItemData ItemOID="I_DISP_DTC" Value="2026-06-01"/>
+                    </ItemGroupData>
+                </FormData>
+            </StudyEventData>
+
             <!-- Follow-up Visit 1 -->
             <StudyEventData StudyEventOID="SE_FOLLOWUP_1" OpenClinica:StartDate="2026-02-01" StudyEventRepeatKey="1">
                 <FormData FormOID="F_VS_1" OpenClinica:Status="complete">

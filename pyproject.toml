@@ -17,7 +17,7 @@ requires-python = ">=3.8"
 cdisc-sdtm = "cdiscbuilder.cli:main"
 
 [tool.setuptools.package-data]
-cdiscbuilder = ["specs/*.yaml", "metadata/*.yaml", "engine/classes/*.py"]
+cdiscbuilder = ["specs/*.yaml", "engine/classes/*.py"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

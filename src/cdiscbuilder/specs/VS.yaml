@@ -1,75 +1,38 @@
 VS:
-  type: FINDINGS
-  definitions:
-    forms: &vs_forms
-      - "F_VS_1"
-    items: &vs_items
-      - "I_VS_HEIGHT"
-      - "I_VS_WEIGHT"
-      - "I_VS_SYSBP"
-      - "I_VS_DIABP"
-
-  columns:
-    - name: STUDYID
-      label: "Study Identifier"
-      type: str
-      source: StudyOID
-    - name: DOMAIN
-      label: "Domain Abbreviation"
-      literal: VS
-      type: str
-    - name: USUBJID
-      label: "Unique Subject Identifier"
-      type: str
-      source: StudySubjectID
-      prefix: "PPT-"
-    - name: VSSEQ
-      label: "Sequence Number"
-      type: int
-
-    - name: VSTESTCD
-      label: "Vital Signs Test Short Name"
-      type: str
-      function: extract_value
-      formoid: *vs_forms
-      itemoid: *vs_items
-
-    - name: VSTEST
-      label: "Vital Signs Test Name"
-      type: str
-
-    - name: VSORRES
-      label: "Result or Finding in Original Units"
-      type: str
-      function: extract_value
-      formoid: *vs_forms
-      itemoid: *vs_items
+  - formoid: "F_VS_1"
+    keys: ["StudyOID", "SubjectKey", "StudyEventOID", "StudyEventRepeatKey", "ItemGroupRepeatKey"]
+    columns:
+      STUDYID: {source: "StudyOID", type: "str"}
+      DOMAIN: {literal: "VS", type: "str"}
+      USUBJID: {source: "SubjectKey", type: "str"}
+      VSSEQ: {source: "ItemGroupRepeatKey", type: "int"}
       
-    - name: VSORRESU
-      label: "Original Units"
-      type: str
-      # No units column in this XML snapshot, maybe hardcode or map?
-      literal: "" 
+      VSTESTCD: 
+        literal: ["HEIGHT", "WEIGHT", "SYSBP", "DIABP"]
+        type: "str"
+      
+      VSTEST:
+        literal: ["Height", "Weight", "Systolic Blood Pressure", "Diastolic Blood Pressure"]
+        type: "str"
 
-    - name: VSSTRESC
-      label: "Character Result/Finding in Std Format"
-      type: str
+      VSORRES:
+        source: ["I_VS_HEIGHT", "I_VS_WEIGHT", "I_VS_SYSBP", "I_VS_DIABP"]
+        type: "str"
+      
+      VSORRESU:
+        literal: ["cm", "kg", "mmHg", "mmHg"]
+        type: "str"
 
-    - name: VSSTRESN
-      label: "Numeric Result/Finding in Std Format"
-      type: float
-      function: extract_value
-      formoid: *vs_forms
-      itemoid: *vs_items
+      VSSTRESC:
+        source: ["I_VS_HEIGHT", "I_VS_WEIGHT", "I_VS_SYSBP", "I_VS_DIABP"]
+        type: "str"
 
-    - name: VSSTRESU
-      label: "Standard Units"
-      type: str
+      VSSTRESN:
+        source: ["I_VS_HEIGHT", "I_VS_WEIGHT", "I_VS_SYSBP", "I_VS_DIABP"]
+        type: "float"
 
-    - name: VSDTC
-      label: "Date/Time of Collection"
-      type: str
-
-    - name: VSEXTPT
-      label: "Extraction Point"
-      type: str
+      VSSTRESU:
+        literal: ["cm", "kg", "mmHg", "mmHg"]
+        type: "str"
+        
+      VSDTC: {literal: "", type: "str"}

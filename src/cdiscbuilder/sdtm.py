@@ -16,6 +16,7 @@ def create_sdtm_datasets(config_input, input_csv, output_dir):
     df_long = pd.read_csv(input_csv)
 
     for domain, settings_entry in config['domains'].items():
+        print(f"DEBUG: Configured Domain: {domain}")
         print(f"Processing domain: {domain}")
         
         # Normalize to list.

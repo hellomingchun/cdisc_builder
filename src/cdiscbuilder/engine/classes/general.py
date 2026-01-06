@@ -1,10 +1,72 @@
 import pandas as pd
 
 class GeneralProcessor:
+    def _expand_settings(self, settings):
+        """
+        Expands a settings dict with list-based sources/literals into multiple settings dicts.
+        """
+        # Find all columns that have a list for source or literal
+        list_cols = {}
+        list_len = 0
+        
+        columns = settings.get('columns', {})
+        for col_name, col_cfg in columns.items():
+            if isinstance(col_cfg, dict):
+                src = col_cfg.get('source')
+                lit = col_cfg.get('literal')
+                
+                # Check source
+                if isinstance(src, list):
+                    if list_len > 0 and len(src) != list_len:
+                        raise ValueError(f"Column '{col_name}' source list length {len(src)} mismatch with others {list_len}")
+                    list_len = len(src)
+                    list_cols[col_name] = 'source'
+                
+                # Check literal
+                if isinstance(lit, list):
+                    if list_len > 0 and len(lit) != list_len:
+                        raise ValueError(f"Column '{col_name}' literal list length {len(lit)} mismatch with others {list_len}")
+                    list_len = len(lit)
+                    list_cols[col_name] = 'literal'
+                    
+        if list_len == 0:
+            return [settings]
+            
+        # Expand
+        expanded_list = []
+        for i in range(list_len):
+            new_settings = settings.copy()
+            new_cols = {}
+            for col_name, col_cfg in columns.items():
+                if isinstance(col_cfg, dict):
+                    new_cfg = col_cfg.copy()
+                    if col_name in list_cols:
+                        param = list_cols[col_name] # 'source' or 'literal'
+                         # Extract the i-th element
+                        val_list = col_cfg.get(param)
+                        new_cfg[param] = val_list[i]
+                    new_cols[col_name] = new_cfg
+                else:
+                    new_cols[col_name] = col_cfg
+            
+            new_settings['columns'] = new_cols
+            expanded_list.append(new_settings)
+            
+        return expanded_list
+
     def process(self, domain_name, sources, df_long, default_keys):
         domain_dfs = []
         
-        for settings in sources:
+        # Pre-expand sources if they contain lists
+        expanded_sources = []
+        for s in sources:
+            try:
+                expanded_sources.extend(self._expand_settings(s))
+            except Exception as e:
+                print(f"Error expanding settings for {domain_name}: {e}")
+                continue # Skip invalid blocks
+        
+        for settings in expanded_sources:
             # 1. Filter by FormOID
             form_oid = settings.get('formoid')
             if form_oid:
