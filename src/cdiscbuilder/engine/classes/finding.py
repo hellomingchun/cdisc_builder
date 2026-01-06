@@ -1,5 +1,5 @@
 import pandas as pd
-import re
+
 
 class FindingProcessor:
     def __init__(self, metadata=None):
@@ -91,7 +91,7 @@ class FindingProcessor:
                                 series = pd.to_numeric(series, errors='coerce').astype('Int64')
                             elif target_type == 'str':
                                 series = series.astype(str)
-                        except:
+                        except Exception:
                             pass
                     
                     final_df[target_col] = series
