@@ -1,5 +1,5 @@
 DM:
-  - formoid: "F_DEMOG_1"
+  - formoid: ["F_DEMOG_1", "F_DEMOG_2"] # Example of merging data from multiple forms
     keys: ["StudyOID", "SubjectKey", "StudySubjectID"]
     columns:
       STUDYID:

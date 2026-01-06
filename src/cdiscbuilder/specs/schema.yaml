@@ -40,7 +40,7 @@ schemas:
       type: dict
       required: [formoid, columns]
       properties:
-        formoid: {type: str}
+        formoid: {type: [str, list]}
         keys: {type: list}
         columns:
           type: dict

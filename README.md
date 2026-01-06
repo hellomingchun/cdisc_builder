@@ -52,6 +52,7 @@ The package comes with standard configurations for common domains (`DM`, `AE`, `
 ```yaml
 DM:
     - formoid: "FORM.DEMOG"
+#    - formoid: ["FORM.DEMOG.1", "FORM.DEMOG.2"] # Multi-form merge supported
       columns:
           STUDYID:
               source: StudyOID

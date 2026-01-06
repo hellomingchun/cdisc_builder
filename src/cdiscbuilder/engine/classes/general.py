@@ -9,8 +9,11 @@ class GeneralProcessor:
             form_oid = settings.get('formoid')
             if form_oid:
                 try:
-                    # Filter for specific FormOID
-                    source_df = df_long[df_long['FormOID'] == form_oid].copy()
+                    # Filter for specific FormOID(s)
+                    if isinstance(form_oid, list):
+                        source_df = df_long[df_long['FormOID'].isin(form_oid)].copy()
+                    else:
+                        source_df = df_long[df_long['FormOID'] == form_oid].copy()
                 except Exception as e:
                     print(f"Error filtering for {domain_name} (FormOID={form_oid}): {e}")
                     continue
