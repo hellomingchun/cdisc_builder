@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cdiscbuilder"
-version = "0.1.6"
+version = "0.1.7"
 description = "A package to convert ODM XML to SDTM/ADaM Datasets"
-authors = [{name = "Mingchun Zhao", email = "hellomingchun@gmail.com"}]
+authors = [{name = "Ming-Chun Chen", email = "hellomingchun@gmail.com"}]
 dependencies = [
     "pandas",
     "pyyaml"
