@@ -139,6 +139,26 @@ class GeneralProcessor:
                     print(f"Warning: No source or literal defined for '{domain_name}.{target_col}'. Filling with NaN.")
                     series = pd.Series([None] * len(pivoted))
                 
+                # Apply Dependency Logic (Assign only if dependency column is not null)
+                dependency = col_config.get('dependency') if isinstance(col_config, dict) else None
+                if dependency:
+                    dep_series = None
+                    if dependency in pivoted.columns:
+                        dep_series = pivoted[dependency]
+                    elif dependency in final_df.columns:
+                        dep_series = final_df[dependency]
+                    
+                    if dep_series is not None:
+                         # Mask: Keep values where dependency is NOT null, else fill with False Value (default None)
+                         false_val = col_config.get('dependency_false_value')
+                         # Make sure false_val is treated as literal of correct type? pandas usually handles mixed.
+                         
+                         series = series.where(dep_series.notna(), false_val)
+                    else:
+                         print(f"Warning: Dependency column '{dependency}' not found for '{domain_name}.{target_col}'. Treating as all-null dependency.")
+                         false_val = col_config.get('dependency_false_value')
+                         series = pd.Series([false_val] * len(pivoted))
+                
                 # Apply Substring Extraction (Before Value Mapping)
                 if isinstance(col_config, dict):
                     sub_start = col_config.get('substring_start')

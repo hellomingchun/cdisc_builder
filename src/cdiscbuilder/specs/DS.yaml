@@ -1,4 +1,33 @@
 DS:
+  # Block 1: Informed Consent
+  - formoid: "F_IC_1"
+    keys: ["StudyOID", "SubjectKey", "StudyEventOID", "StudyEventRepeatKey", "ItemGroupRepeatKey"]
+    columns:
+      STUDYID:
+        source: "StudyOID"
+        type: "str"
+      DOMAIN:
+        literal: "DS"
+        type: "str"
+      USUBJID:
+        source: "SubjectKey"
+        type: "str"
+      DSSEQ:
+        source: "ItemGroupRepeatKey" # Will likely be 1, duplicates allowed across events in raw output
+        type: "int"
+      DSTERM:
+        literal: "INFORMED CONSENT" # Enrolled/Screened etc
+        type: "str"
+      DSDECOD:
+        literal: "INFORMED CONSENT OBTAINED"
+        dependency: "I_IC_DATE"
+        dependency_false_value: "INFORMED CONSENT NOT OBTAINED"
+        type: "str"
+      DSSTDTC:
+        source: "I_IC_DATE"
+        type: "str"
+
+  # Block 2: Disposition (Termination)
   - formoid: "F_DISP_1"
     keys: ["StudyOID", "SubjectKey", "StudyEventOID", "StudyEventRepeatKey", "ItemGroupRepeatKey"]
     columns:
@@ -12,14 +41,14 @@ DS:
         source: "SubjectKey"
         type: "str"
       DSSEQ:
-        source: "ItemGroupRepeatKey"
-        type: "int"
+         source: "ItemGroupRepeatKey"
+         type: "int"
       DSTERM:
         source: "I_DISP_TERM"
         type: "str"
       DSDECOD:
         source: "I_DISP_DECOD"
         type: "str"
-      DSDTC:
+      DSSTDTC:
         source: "I_DISP_DTC"
         type: "str"

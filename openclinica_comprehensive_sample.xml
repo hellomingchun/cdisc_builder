@@ -7,6 +7,16 @@
      CreationDateTime="2026-01-05T15:29:33.095296">
     <ClinicalData StudyOID="S_DEMO_001" MetaDataVersionOID="v1.0.0">
         <SubjectData SubjectKey="SS_001" OpenClinica:StudySubjectID="PID-001">
+            <!-- Screening Visit (Informed Consent) -->
+            <StudyEventData StudyEventOID="SE_SCREENING" OpenClinica:StartDate="2025-12-31" StudyEventRepeatKey="1">
+                <FormData FormOID="F_IC_1" OpenClinica:Status="complete">
+                    <ItemGroupData ItemGroupOID="IG_IC" ItemGroupRepeatKey="1">
+                        <ItemData ItemOID="I_IC_YN" Value="YES"/>
+                        <ItemData ItemOID="I_IC_DATE" Value="2025-12-31"/>
+                    </ItemGroupData>
+                </FormData>
+            </StudyEventData>
+
             <!-- Baseline Visit -->
             <StudyEventData StudyEventOID="SE_BASELINE" OpenClinica:StartDate="2026-01-01" StudyEventRepeatKey="1">
                 <FormData FormOID="F_DEMOG_1" OpenClinica:Status="complete">
