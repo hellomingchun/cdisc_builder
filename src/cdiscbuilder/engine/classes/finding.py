@@ -96,6 +96,10 @@ class FindingProcessor:
                     
                     final_df[target_col] = series
             
+            # Filter to keep only target columns
+            cols_to_keep = list(mappings.keys())
+            final_df = final_df[cols_to_keep]
+            
             domain_dfs.append(final_df)
             
         return domain_dfs
