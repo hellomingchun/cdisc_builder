@@ -25,6 +25,9 @@ SV:
       VISIT:
         source: "StudyEventOID"
         type: "str"
+      VISITNUM:
+        source: "StudyEventRepeatKey"
+        type: "int"
       SVSTDTC:
         source: "StudyEventStartDate"
         type: "str"

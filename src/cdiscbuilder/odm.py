@@ -62,10 +62,10 @@ def parse_odm_to_long_df(xml_file):
                         tag = get_local_name(child.tag)
                         if tag == 'StudyEventData':
                             study_event_oid = child.get('StudyEventOID')
-                            study_event_repeat_key = child.get('StudyEventRepeatKey')
+                            study_event_repeat_key = child.get('StudyEventRepeatKey') or "1"
                             
                             # Extract Namespaced StartDate
-                            start_date = get_attrib(child, 'StartDate')
+                            start_date = get_attrib(child, 'StartDate') or ""
                             
                             for form in child:
                                 f_tag = get_local_name(form.tag)
