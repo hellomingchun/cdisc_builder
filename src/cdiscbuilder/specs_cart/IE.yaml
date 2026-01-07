@@ -20,7 +20,7 @@ IE:
         source: "ItemOID"
         regex_extract: "I_ELIGI_(.*)"
       IETEST:
-        source: "Metadata.Question" # Fallback to Name if Question empty?
+        source: "Question" # Fallback to Name if Question empty?
       IECAT:
         literal: "INCLUSION"
       IEORRES:
@@ -46,7 +46,7 @@ IE:
         source: "ItemOID"
         regex_extract: "I_ELIGI_(.*)"
       IETEST:
-        source: "Metadata.Question"
+        source: "Question"
       IECAT:
         literal: "EXCLUSION"
       IEORRES:

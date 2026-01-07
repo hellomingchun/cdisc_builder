@@ -2,8 +2,8 @@ import pandas as pd
 
 
 class FindingProcessor:
-    def __init__(self, metadata=None):
-        self.metadata = metadata or {}
+    def __init__(self, item_question_map=None):
+        self.item_question_map = item_question_map or {}
 
     def process(self, domain_name, sources, df_long, default_keys):
         domain_dfs = []
@@ -64,14 +64,9 @@ class FindingProcessor:
                      series = pd.Series([literal_expr] * len(final_df), index=final_df.index)
                 
                 elif source_expr:
-                    # Special source: "Metadata.Name", "Metadata.Question"
-                    if source_expr.startswith("Metadata."):
-                        prop = source_expr.split(".")[1] # Name or Question
-                        # Map ItemOID to property using self.metadata
-                        def get_meta(oid):
-                            return self.metadata.get(oid, {}).get(prop, "")
-                        
-                        series = final_df['ItemOID'].map(get_meta)
+                    if source_expr == "Question":
+                        # Map ItemOID to question using map
+                        series = final_df['ItemOID'].map(lambda oid: self.item_question_map.get(oid, ""))
                     
                     elif source_expr == "ItemOID":
                         series = final_df['ItemOID']

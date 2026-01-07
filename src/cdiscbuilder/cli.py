@@ -19,7 +19,7 @@ def main():
     # Step 1: ODM XML -> Long CSV
     print(f"--- Step 1: Parsing ODM XML from {args.xml} ---")
     try:
-        df, metadata = parse_odm_to_long_df(args.xml)
+        df, item_question_map = parse_odm_to_long_df(args.xml)
         print(f"Parsed {len(df)} rows.")
         df.to_csv(args.csv, index=False)
         print(f"Saved intermediate data to {args.csv}")
@@ -33,7 +33,7 @@ def main():
         os.makedirs(args.output)
         
     try:
-        create_sdtm_datasets(args.configs, args.csv, args.output, metadata)
+        create_sdtm_datasets(args.configs, args.csv, args.output, item_question_map)
         print(f"\nSuccess! SDTM datasets created in {args.output}")
     except Exception as e:
         print(f"Error creating SDTM datasets: {e}")
