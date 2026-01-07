@@ -27,3 +27,27 @@ VS:
         source: "Value"
       VSSTRESC:
         source: "Value"
+      VSSTRESU:
+        source: "ItemOID"
+        value_map:
+          I_KITCH_HEIGHT: "cm"
+          I_KITCH_WEIGHT: "kg"
+          I_KITCH_BP_SYS: "mmHg"
+          I_KITCH_BP_DIA: "mmHg"
+          I_KITCH_BP_SYS_MEAN: "mmHg"
+          I_KITCH_BP_DIA_MEAN: "mmHg"
+          I_KITCH_PULSE: "beats/min"
+          I_KITCH_PULSE_VAL: "beats/min"
+      VSORRESU:
+        source: "ItemOID"
+        value_map:
+          I_KITCH_HEIGHT: "cm"
+          I_KITCH_WEIGHT: "kg"
+          I_KITCH_BP_SYS: "mmHg"
+          I_KITCH_BP_DIA: "mmHg"
+          I_KITCH_BP_SYS_MEAN: "mmHg"
+          I_KITCH_BP_DIA_MEAN: "mmHg"
+          I_KITCH_PULSE: "beats/min"
+          I_KITCH_PULSE_VAL: "beats/min"
+      VSDTC:
+        source: "StudyEventStartDate"

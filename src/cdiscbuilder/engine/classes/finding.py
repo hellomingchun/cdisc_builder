@@ -78,10 +78,17 @@ class FindingProcessor:
                     elif source_expr in source_df.columns:
                          series = source_df[source_expr]
                     
-                    # Regex Extraction from source
                     if regex_extract and series is not None:
                          # Extract group 1
                          series = series.astype(str).str.extract(regex_extract)[0]
+                
+                # Value Map
+                value_map = None
+                if isinstance(col_config, dict):
+                    value_map = col_config.get('value_map')
+                
+                if value_map and series is not None:
+                     series = series.map(value_map)
                 
                 # Apply Prefix
                 prefix = None
