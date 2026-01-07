@@ -2,8 +2,8 @@ import pandas as pd
 
 
 class FindingProcessor:
-    def __init__(self, item_question_map=None):
-        self.item_question_map = item_question_map or {}
+    def __init__(self):
+        pass
 
     def process(self, domain_name, sources, df_long, default_keys):
         domain_dfs = []
@@ -37,7 +37,12 @@ class FindingProcessor:
             # We treat every row as a potential finding
             # Base columns: Keys + ItemOID + Value
             keys = settings.get('keys', default_keys)
+            
+            # Check if Question exists in source_df (it should based on odm.py changes)
             base_cols = keys + ['ItemOID', 'Value']
+            if 'Question' in source_df.columns:
+                 base_cols.append('Question')
+
             final_df = source_df[base_cols].copy()
             
             # 4. Map Columns
@@ -64,11 +69,7 @@ class FindingProcessor:
                      series = pd.Series([literal_expr] * len(final_df), index=final_df.index)
                 
                 elif source_expr:
-                    if source_expr == "Question":
-                        # Map ItemOID to question using map
-                        series = final_df['ItemOID'].map(lambda oid: self.item_question_map.get(oid, ""))
-                    
-                    elif source_expr == "ItemOID":
+                    if source_expr == "ItemOID":
                         series = final_df['ItemOID']
                     elif source_expr == "Value":
                         series = final_df['Value']

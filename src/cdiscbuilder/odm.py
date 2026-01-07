@@ -9,6 +9,28 @@ def parse_odm_to_long_df(xml_file):
         print(f"Error parsing XML file {xml_file}: {e}")
         return pd.DataFrame()
 
+    def parse_metadata(root):
+        item_question_map = {}
+        ns = {'odm': 'http://www.cdisc.org/ns/odm/v1.3'}
+        # Find MetaDataVersion - simplified lookup
+        for study in root.findall('odm:Study', ns):
+            for mdv in study.findall('odm:MetaDataVersion', ns):
+                for item_def in mdv.findall('odm:ItemDef', ns):
+                    oid = item_def.get('OID')
+                    
+                    # Try to find Question/TranslatedText
+                    question = ""
+                    q_elem = item_def.find('odm:Question', ns)
+                    if q_elem is not None:
+                        tt_elem = q_elem.find('odm:TranslatedText', ns)
+                        if tt_elem is not None:
+                            question = tt_elem.text.strip() if tt_elem.text else ""
+                    
+                    item_question_map[oid] = question
+        return item_question_map
+
+    item_question_map = parse_metadata(root)
+
     data_rows = []
 
     def get_local_name(tag):
@@ -73,34 +95,9 @@ def parse_odm_to_long_df(xml_file):
                                                         'ItemGroupOID': item_group_oid,
                                                         'ItemGroupRepeatKey': item_group_repeat_key,
                                                         'ItemOID': item_oid,
-                                                        'Value': value
+                                                        'Value': value,
+                                                        'Question': item_question_map.get(item_oid, "")
                                                     })
 
-    metadata = {}
-    
-    # helper for metadata
-    # helper for metadata
-    def parse_metadata(root):
-        item_question_map = {}
-        ns = {'odm': 'http://www.cdisc.org/ns/odm/v1.3'}
-        # Find MetaDataVersion - simplified lookup
-        for study in root.findall('odm:Study', ns):
-            for mdv in study.findall('odm:MetaDataVersion', ns):
-                for item_def in mdv.findall('odm:ItemDef', ns):
-                    oid = item_def.get('OID')
-                    
-                    # Try to find Question/TranslatedText
-                    question = ""
-                    q_elem = item_def.find('odm:Question', ns)
-                    if q_elem is not None:
-                        tt_elem = q_elem.find('odm:TranslatedText', ns)
-                        if tt_elem is not None:
-                            question = tt_elem.text.strip() if tt_elem.text else ""
-                    
-                    item_question_map[oid] = question
-        return item_question_map
-
-    item_question_map = parse_metadata(root)
-
     df = pd.DataFrame(data_rows)
-    return df, item_question_map
+    return df

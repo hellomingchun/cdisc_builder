@@ -3,7 +3,7 @@ import os
 from .classes.general import GeneralProcessor
 
 
-def process_domain(domain_name, sources, df_long, default_keys, output_dir, item_question_map=None):
+def process_domain(domain_name, sources, df_long, default_keys, output_dir):
     # Determine type of the first block (assumes all blocks in a domain are same type)
     # process_domain receives 'sources' which is settings_entry.
     
@@ -21,7 +21,7 @@ def process_domain(domain_name, sources, df_long, default_keys, output_dir, item
     p_type = sources[0].get('type', 'general') if sources else 'general'
 
     if p_type == 'finding':
-        processor = FindingProcessor(item_question_map)
+        processor = FindingProcessor()
     else:
         processor = GeneralProcessor()
 

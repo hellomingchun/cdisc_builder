@@ -2,7 +2,7 @@ import pandas as pd
 from .engine.config import load_config
 from .engine.processor import process_domain
 
-def create_sdtm_datasets(config_input, input_csv, output_dir, item_question_map=None):
+def create_sdtm_datasets(config_input, input_csv, output_dir):
     if isinstance(config_input, dict):
         config = config_input
         # We assume it's already structured correctly or validated
@@ -25,6 +25,6 @@ def create_sdtm_datasets(config_input, input_csv, output_dir, item_question_map=
         else:
             sources = [settings_entry]
             
-        process_domain(domain, sources, df_long, default_keys, output_dir, item_question_map)
+        process_domain(domain, sources, df_long, default_keys, output_dir)
 
 
