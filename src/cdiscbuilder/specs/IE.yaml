@@ -1,6 +1,6 @@
 IE:
   - formoid: "F_IE_1"
-    keys: ["StudyOID", "SubjectKey", "StudyEventOID", "StudyEventRepeatKey", "ItemGroupRepeatKey"]
+    keys: ["StudyOID", "StudySubjectID", "StudyEventOID", "StudyEventRepeatKey", "ItemGroupRepeatKey"]
     columns:
       STUDYID:
         source: "StudyOID"
@@ -9,7 +9,8 @@ IE:
         literal: "IE"
         type: "str"
       USUBJID:
-        source: "SubjectKey"
+        source: "StudySubjectID"
+        prefix: "PPT-"
         type: "str"
       IESEQ:
         source: "ItemGroupRepeatKey"

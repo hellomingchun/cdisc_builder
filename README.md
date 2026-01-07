@@ -52,13 +52,14 @@ The package comes with standard configurations for common domains (`DM`, `AE`, `
 ```yaml
 DM:
     - formoid: "FORM.DEMOG"
-#    - formoid: ["FORM.DEMOG.1", "FORM.DEMOG.2"] # Multi-form merge supported
+      keys: ["StudyOID", "StudySubjectID"]
       columns:
           STUDYID:
               source: StudyOID
               type: str
           USUBJID:
-              source: SubjectKey
+              source: StudySubjectID
+              prefix: "PPT-"
               type: str
           AGE:
               source: IT.AGE

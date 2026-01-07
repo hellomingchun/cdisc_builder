@@ -33,9 +33,11 @@ class FindingProcessor:
                 continue
                 
             # 3. Create Base DataFrame (No Pivot!)
+            # 3. Create Base DataFrame (No Pivot!)
             # We treat every row as a potential finding
             # Base columns: Keys + ItemOID + Value
-            base_cols = default_keys + ['ItemOID', 'Value']
+            keys = settings.get('keys', default_keys)
+            base_cols = keys + ['ItemOID', 'Value']
             final_df = source_df[base_cols].copy()
             
             # 4. Map Columns
@@ -77,11 +79,21 @@ class FindingProcessor:
                         series = final_df['Value']
                     elif source_expr in final_df.columns:
                         series = final_df[source_expr]
+                    elif source_expr in source_df.columns:
+                         series = source_df[source_expr]
                     
                     # Regex Extraction from source
                     if regex_extract and series is not None:
                          # Extract group 1
                          series = series.astype(str).str.extract(regex_extract)[0]
+                
+                # Apply Prefix
+                prefix = None
+                if isinstance(col_config, dict):
+                    prefix = col_config.get('prefix')
+                
+                if prefix and series is not None:
+                    series = prefix + series.astype(str)
                 
                 if series is not None:
                     # Type Conversion

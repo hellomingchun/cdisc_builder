@@ -1,6 +1,6 @@
 AE:
   - formoid: "F_ADVERSEEVENT"
-    keys: ["StudyOID", "SubjectKey", "StudyEventOID", "StudyEventRepeatKey", "ItemGroupRepeatKey"]
+    keys: ["StudyOID", "StudySubjectID", "StudyEventOID", "StudyEventRepeatKey", "ItemGroupRepeatKey"]
     columns:
       STUDYID:
         source: StudyOID
@@ -9,7 +9,8 @@ AE:
         literal: AE
         type: str
       USUBJID:
-        source: SubjectKey
+        source: StudySubjectID
+        prefix: "CART-"
         type: str
       AESEQ:
         source: ItemGroupRepeatKey

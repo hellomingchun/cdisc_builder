@@ -1,6 +1,6 @@
 DM:
   - formoid: "F_1DEMOGRAPHIC"
-    keys: ["StudyOID", "SubjectKey"]
+    keys: ["StudyOID", "StudySubjectID"]
     columns:
       STUDYID:
         source: "StudyOID"
@@ -9,10 +9,11 @@ DM:
         literal: "DM"
         type: "str"
       USUBJID:
-        source: "SubjectKey"
+        source: "StudySubjectID"
+        prefix: "CART-"
         type: "str"
       SUBJID:
-        source: "SubjectKey"
+        source: "StudySubjectID"
         type: "str"
       RFSTDTC:
         source: "I_1DEMO_DATE"

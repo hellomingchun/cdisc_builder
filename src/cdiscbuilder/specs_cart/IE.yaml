@@ -5,14 +5,15 @@ IE:
     # Match Inclusion Group
     item_group_regex: "IG_ELIGI_INC1"
     item_oid_regex: "I_ELIGI_.*"
-    keys: ["StudyOID", "SubjectKey", "StudyEventOID", "StudyEventRepeatKey"] 
+    keys: ["StudyOID", "StudySubjectID", "StudyEventOID", "StudyEventRepeatKey"] 
     columns:
       STUDYID:
         source: "StudyOID"
       DOMAIN:
         literal: "IE"
       USUBJID:
-        source: "SubjectKey"
+        source: "StudySubjectID"
+        prefix: "CART-"
       IESEQ:
         source: "ItemGroupRepeatKey"
       IETESTCD:
@@ -32,14 +33,15 @@ IE:
     formoid: "F_ELIGIBILITY"
     item_group_regex: "IG_ELIGI_EXCT"
     item_oid_regex: "I_ELIGI_.*"
-    keys: ["StudyOID", "SubjectKey", "StudyEventOID"]
+    keys: ["StudyOID", "StudySubjectID", "StudyEventOID"]
     columns:
       STUDYID:
         source: "StudyOID"
       DOMAIN:
         literal: "IE"
       USUBJID:
-        source: "SubjectKey"
+        source: "StudySubjectID"
+        prefix: "CART-"
       IETESTCD:
         source: "ItemOID"
         regex_extract: "I_ELIGI_(.*)"
