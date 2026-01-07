@@ -10,13 +10,14 @@ def parse_odm_to_long_df(xml_file):
         return pd.DataFrame()
 
     def parse_metadata(root):
-        item_question_map = {}
+        item_metadata = {}
         ns = {'odm': 'http://www.cdisc.org/ns/odm/v1.3'}
         # Find MetaDataVersion - simplified lookup
         for study in root.findall('odm:Study', ns):
             for mdv in study.findall('odm:MetaDataVersion', ns):
                 for item_def in mdv.findall('odm:ItemDef', ns):
                     oid = item_def.get('OID')
+                    name = item_def.get('Name', "")
                     
                     # Try to find Question/TranslatedText
                     question = ""
@@ -26,10 +27,10 @@ def parse_odm_to_long_df(xml_file):
                         if tt_elem is not None:
                             question = tt_elem.text.strip() if tt_elem.text else ""
                     
-                    item_question_map[oid] = question
-        return item_question_map
+                    item_metadata[oid] = {'Question': question, 'ItemName': name}
+        return item_metadata
 
-    item_question_map = parse_metadata(root)
+    item_metadata = parse_metadata(root)
 
     data_rows = []
 
@@ -84,6 +85,7 @@ def parse_odm_to_long_df(xml_file):
                                                     item_oid = item.get('ItemOID')
                                                     value = item.get('Value')
                                                     
+                                                    meta = item_metadata.get(item_oid, {})
                                                     data_rows.append({
                                                         'StudyOID': study_oid,
                                                         'SubjectKey': subject_key,
@@ -96,7 +98,8 @@ def parse_odm_to_long_df(xml_file):
                                                         'ItemGroupRepeatKey': item_group_repeat_key,
                                                         'ItemOID': item_oid,
                                                         'Value': value,
-                                                        'Question': item_question_map.get(item_oid, "")
+                                                        'Question': meta.get('Question', ""),
+                                                        'ItemName': meta.get('ItemName', "")
                                                     })
 
     df = pd.DataFrame(data_rows)
