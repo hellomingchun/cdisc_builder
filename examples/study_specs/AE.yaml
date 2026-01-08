@@ -12,14 +12,15 @@ AE:
         source: "StudySubjectID"
         prefix: "CART-"
         type: "str"
+      AESTDTC:
+        source: "I_ADVER_AESTDAT"
+        type: "str"
       AESEQ:
-        source: "ItemGroupRepeatKey"
+        group: ["USUBJID"]
+        sort_by: ["AESTDTC"]
         type: "int"
       AETERM:
         source: "I_ADVER_AETERM"
-        type: "str"
-      AESTDTC:
-        source: "I_ADVER_AESTDAT"
         type: "str"
       AEENDTC:
         source: "I_ADVER_AEENDDAT"

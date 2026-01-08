@@ -15,8 +15,12 @@ VS:
       USUBJID:
         source: "StudySubjectID"
         prefix: "CART-"
+      VSDTC:
+        source: "StudyEventStartDate"
       VSSEQ:
-        source: "ItemGroupRepeatKey"
+        group: ["USUBJID"]
+        sort_by: ["VSDTC"]
+        type: int
       VSTESTCD:
         source: "ItemOID"
         # Extract the suffix (e.g. HEIGHT from I_KITCH_HEIGHT)
@@ -49,5 +53,3 @@ VS:
           I_KITCH_BP_DIA_MEAN: "mmHg"
           I_KITCH_PULSE: "beats/min"
           I_KITCH_PULSE_VAL: "beats/min"
-      VSDTC:
-        source: "StudyEventStartDate"

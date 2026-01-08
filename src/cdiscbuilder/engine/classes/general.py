@@ -118,13 +118,57 @@ class GeneralProcessor:
                     literal_expr = col_config.get('literal')
                     target_type = col_config.get('type')
                     value_map = col_config.get('value_mapping')
+                    group_cols = col_config.get('group')
+                    sort_cols = col_config.get('sort_by')
                 else:
                     source_expr = col_config
                     literal_expr = None
+                    group_cols = None
+                    sort_cols = None
                 
                 # Extract Data
                 series = None
-                if literal_expr is not None:
+                
+                # 0. Group-Based Sequence Generation (High Priority)
+                if group_cols:
+                    if not isinstance(group_cols, list):
+                        group_cols = [group_cols]
+                    
+                    # Validate existence of group columns
+                    missing_grp = [c for c in group_cols if c not in final_df.columns]
+                    if missing_grp:
+                        print(f"Warning: Group columns {missing_grp} not found in final_df for '{domain_name}.{target_col}'. SEQ generation skipped.")
+                        series = pd.Series([None] * len(pivoted))
+                    else:
+                        # Create temp DataFrame for sorting/grouping
+                        # We use final_df columns. We need to preserve index alignment.
+                        # final_df is currently built row-by-row matching pivoted's rows.
+                        temp_df = final_df[group_cols].copy()
+                        
+                        sort_keys = group_cols[:] # Always sort by group first
+                        
+                        if sort_cols:
+                            if not isinstance(sort_cols, list):
+                                sort_cols = [sort_cols]
+                                
+                            missing_sort = [c for c in sort_cols if c not in final_df.columns]
+                            if missing_sort:
+                                print(f"Warning: Sort columns {missing_sort} not found for '{domain_name}.{target_col}'. using partial/no sort.")
+                            else:
+                                for c in sort_cols:
+                                    temp_df[c] = final_df[c]
+                                sort_keys.extend(sort_cols)
+                        
+                        # Sort
+                        temp_df = temp_df.sort_values(by=sort_keys)
+                        
+                        # Calculate Cumcount + 1
+                        seq_series = temp_df.groupby(group_cols).cumcount() + 1
+                        
+                        # Map back to original index
+                        series = seq_series.sort_index()
+
+                elif literal_expr is not None:
                     # Explicit literal value
                     series = pd.Series([literal_expr] * len(pivoted))
                 elif source_expr:

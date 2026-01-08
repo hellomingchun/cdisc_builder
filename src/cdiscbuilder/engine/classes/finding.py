@@ -62,10 +62,41 @@ class FindingProcessor:
                     literal_expr = col_config.get('literal')
                     target_type = col_config.get('type')
                     regex_extract = col_config.get('regex_extract') # e.g. "I_ELIGI_(.*)"
+                    group_cols = col_config.get('group')
+                    sort_cols = col_config.get('sort_by')
                 else:
                     source_expr = col_config # simplistic
+                    group_cols = None
+                    sort_cols = None
                 
-                if literal_expr is not None:
+                # 0. Group-Based Sequence Generation
+                if group_cols:
+                    if not isinstance(group_cols, list):
+                        group_cols = [group_cols]
+                    
+                    missing_grp = [c for c in group_cols if c not in final_df.columns]
+                    if missing_grp:
+                         print(f"Warning: Group cols {missing_grp} missing for {target_col}")
+                         series = pd.Series([None] * len(final_df), index=final_df.index)
+                    else:
+                        temp_df = final_df[group_cols].copy()
+                        sort_keys = group_cols[:]
+                        
+                        if sort_cols:
+                            if not isinstance(sort_cols, list): sort_cols = [sort_cols]
+                            missing_sort = [c for c in sort_cols if c not in final_df.columns]
+                            if not missing_sort:
+                                for c in sort_cols: temp_df[c] = final_df[c]
+                                sort_keys.extend(sort_cols)
+                        
+                        # Sort
+                        temp_df = temp_df.sort_values(by=sort_keys)
+                        # Cumcount
+                        seq_series = temp_df.groupby(group_cols).cumcount() + 1
+                        # Re-align
+                        series = seq_series.sort_index()
+
+                elif literal_expr is not None:
                      series = pd.Series([literal_expr] * len(final_df), index=final_df.index)
                 
                 elif source_expr:

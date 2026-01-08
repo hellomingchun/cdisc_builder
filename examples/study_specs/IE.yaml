@@ -14,11 +14,13 @@ IE:
       USUBJID:
         source: "StudySubjectID"
         prefix: "CART-"
-      IESEQ:
-        source: "ItemGroupRepeatKey"
       IETESTCD:
         source: "ItemOID"
         regex_extract: "I_ELIGI_(.*)"
+      IESEQ:
+        group: ["USUBJID"]
+        sort_by: ["IETESTCD"]
+        type: int
       IETEST:
         source: "Question" # Fallback to Name if Question empty?
       IECAT:
@@ -45,6 +47,10 @@ IE:
       IETESTCD:
         source: "ItemOID"
         regex_extract: "I_ELIGI_(.*)"
+      IESEQ:
+        group: ["USUBJID"]
+        sort_by: ["IETESTCD"]
+        type: int
       IETEST:
         source: "Question"
       IECAT:
