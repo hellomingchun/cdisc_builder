@@ -17,6 +17,8 @@ IE:
       IETESTCD:
         source: "ItemOID"
         regex_extract: "I_ELIGI_(.*)"
+      IEDTC:
+        source: "StudyEventStartDate"
       IESEQ:
         group: ["USUBJID"]
         sort_by: ["IETESTCD"]
@@ -47,6 +49,8 @@ IE:
       IETESTCD:
         source: "ItemOID"
         regex_extract: "I_ELIGI_(.*)"
+      IEDTC:
+        source: "StudyEventStartDate"
       IESEQ:
         group: ["USUBJID"]
         sort_by: ["IETESTCD"]
