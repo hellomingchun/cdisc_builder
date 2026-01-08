@@ -114,6 +114,7 @@ class GeneralProcessor:
                 # Check if simple string or object config
                 if isinstance(col_config, dict):
                     source_expr = col_config.get('source')
+                    fallback_expr = col_config.get('fallback')
                     literal_expr = col_config.get('literal')
                     target_type = col_config.get('type')
                     value_map = col_config.get('value_mapping')
@@ -138,6 +139,19 @@ class GeneralProcessor:
                 else:
                     print(f"Warning: No source or literal defined for '{domain_name}.{target_col}'. Filling with NaN.")
                     series = pd.Series([None] * len(pivoted))
+
+                # Apply Fallback
+                if fallback_expr:
+                    fallback_series = None
+                    if fallback_expr in pivoted.columns:
+                        fallback_series = pivoted[fallback_expr]
+                    elif fallback_expr in final_df.columns:
+                        fallback_series = final_df[fallback_expr]
+                    
+                    if fallback_series is not None:
+                        series = series.fillna(fallback_series)
+                    else:
+                         print(f"Warning: Fallback column '{fallback_expr}' not found for '{domain_name}.{target_col}'")
                 
                 # Apply Dependency Logic (Assign only if dependency column is not null)
                 dependency = col_config.get('dependency') if isinstance(col_config, dict) else None

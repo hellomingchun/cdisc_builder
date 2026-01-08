@@ -13,7 +13,8 @@ DM:
         prefix: "CART-"
         type: "str"
       SUBJID:
-        source: "StudySubjectID"
+        source: "RFSTDTC"
+        fallback: "USUBJID"
         type: "str"
       RFSTDTC:
         source: "I_1DEMO_DATE"
