@@ -114,6 +114,13 @@ SITEID:
   source: FULL_ID
   substring_start: 3
   substring_length: 3
+
+**Fallback** (use secondary source if primary is missing):
+```yaml
+SUBJID:
+  source: RFSTDTC
+  fallback: USUBJID
+```
 ```
 
 **Default Values**:

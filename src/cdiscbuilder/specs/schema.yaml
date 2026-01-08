@@ -13,6 +13,7 @@ definitions:
       substring_length: {type: int}
       mapping_default: {type: [str, int, float, bool]}
       mapping_default_source: {type: str}
+      fallback: {type: str}
       dependency: {type: str}
       dependency_false_value: {type: [str, int, float, bool]}
       regex_extract: {type: str}
