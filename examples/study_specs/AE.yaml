@@ -1,26 +1,29 @@
-CM:
-  - formoid: "F_CM_1"
+AE:
+  - formoid: "F_ADVERSEEVENT"
     keys: ["StudyOID", "StudySubjectID", "StudyEventOID", "StudyEventRepeatKey", "ItemGroupRepeatKey"]
     columns:
       STUDYID:
         source: "StudyOID"
         type: "str"
       DOMAIN:
-        literal: "CM"
+        literal: "AE"
         type: "str"
       USUBJID:
         source: "StudySubjectID"
-        prefix: "PPT-"
+        prefix: "CART-"
         type: "str"
-      CMSEQ:
+      AESEQ:
         source: "ItemGroupRepeatKey"
         type: "int"
-      CMTRT:
-        source: "I_CM_TERM"
+      AETERM:
+        source: "I_ADVER_AETERM"
         type: "str"
-      CMDOSE:
-        source: "I_CM_DOSE"
-        type: "float"
-      CMDOSEU:
-        source: "I_CM_UNIT"
+      AESTDTC:
+        source: "I_ADVER_AESTDAT"
+        type: "str"
+      AEENDTC:
+        source: "I_ADVER_AEENDDAT"
+        type: "str"
+      AESEV:
+        source: "I_ADVER_AESEV"
         type: "str"

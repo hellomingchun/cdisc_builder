@@ -13,8 +13,9 @@ DM:
         prefix: "CART-"
         type: "str"
       SUBJID:
-        source: "RFSTDTC"
-        fallback: "USUBJID"
+        # Fallback mechanism for demonstration
+        source: "RFSTDTC" # Source column to try first
+        fallback: "USUBJID" # Fallback column if source is missing/null
         type: "str"
       RFSTDTC:
         source: "I_1DEMO_DATE"

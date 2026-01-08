@@ -27,7 +27,7 @@ import os
 from cdiscbuilder.odm import parse_odm_to_long_df
 
 # Paths
-xml_path = "../cdisc_odm_example_1.xml"  # Adjust path as needed
+xml_path = "../car-t-openclinica.xml"  # Adjust path as needed
 input_csv = "odm_long.csv"
 output_dir = "output_datasets"
 
@@ -48,7 +48,7 @@ df_long.head()
 ## Step 2: Custom Configuration
 
 Instead of writing mapping rules in Python, we keep them in a separate folder.
-We have created a folder named `study_specs` containing `ND.yaml`.
+We have created a folder named `study_specs` containing `DM.yaml` and `AE.yaml`.
 
 ```{python}
 import os
@@ -86,14 +86,17 @@ if os.path.exists(dm_path):
 else:
     print("DM.parquet not found.")
 
-# Load Generated ND
-nd_path = os.path.join(output_dir, "ND.parquet")
-if os.path.exists(nd_path):
-    df_nd = pd.read_parquet(nd_path)
-    print("\n--- Generated ND (New Domain) Dataset ---")
-    print(df_nd.head())
+# Load Generated AE
+ae_path = os.path.join(output_dir, "AE.parquet")
+if os.path.exists(ae_path):
+    df_ae = pd.read_parquet(ae_path)
+    print("\n--- Generated AE Dataset ---")
+    print(df_ae.head())
+    
+    # Verify Columns
+    print(f"AE Columns: {df_ae.columns.tolist()}")
 else:
-    print("ND.parquet not found.")
+    print("AE.parquet not found.")
 ```
 
 ## Cleanup
