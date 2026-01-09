@@ -33,7 +33,7 @@ VS:
         source: "Value"
       VSSTRESU:
         source: "ItemOID"
-        value_map:
+        value_mapping:
           I_KITCH_HEIGHT: "cm"
           I_KITCH_WEIGHT: "kg"
           I_KITCH_BP_SYS: "mmHg"
@@ -44,7 +44,7 @@ VS:
           I_KITCH_PULSE_VAL: "beats/min"
       VSORRESU:
         source: "ItemOID"
-        value_map:
+        value_mapping:
           I_KITCH_HEIGHT: "cm"
           I_KITCH_WEIGHT: "kg"
           I_KITCH_BP_SYS: "mmHg"

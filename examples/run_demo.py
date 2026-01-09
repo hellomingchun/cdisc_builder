@@ -32,20 +32,23 @@ def run_demo():
             df = pd.read_parquet(p)
             print(f"\n--- {domain} Head ---")
             print(df.head())
-            seq_col = f"{domain}SEQ"
-            if seq_col in df.columns:
-                print(f"{seq_col} present.")
-                # Basic check for SEQ monotonicity per USUBJID
-                # Just print first subject seq
-                first_sub = df['USUBJID'].iloc[0]
-                sub_df = df[df['USUBJID'] == first_sub]
-                print(f"SEQ for {first_sub}: {sub_df[seq_col].tolist()}")
-            else:
-                print(f"ERROR: {seq_col} missing in {domain}")
-                failed = True
         else:
             print(f"Warning: {domain}.parquet not generated.")
-            # CM might fail if I guessed wrong, but AE VS IE should work
+            failed = True
+
+    # Check VS units
+    p_vs = os.path.join(output_dir, "VS.parquet")
+    if os.path.exists(p_vs):
+        df_vs = pd.read_parquet(p_vs)
+        print("\n--- VS Unit Check ---")
+        print(df_vs[['VSTESTCD', 'VSSTRESU', 'VSORRESU']].head(10))
+        
+        # Verify units exist (not NaN)
+        valid_units = df_vs['VSSTRESU'].dropna().unique()
+        print(f"Mapped Units: {valid_units}")
+        if len(valid_units) == 0:
+            print("ERROR: No units mapped in VS!")
+            failed = True
             
     if failed:
         sys.exit(1)

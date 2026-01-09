@@ -116,7 +116,7 @@ class FindingProcessor:
                 # Value Map
                 value_map = None
                 if isinstance(col_config, dict):
-                    value_map = col_config.get('value_map')
+                    value_map = col_config.get('value_mapping')
                 
                 if value_map and series is not None:
                      series = series.map(value_map)
