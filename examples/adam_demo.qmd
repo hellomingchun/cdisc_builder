@@ -1,0 +1,55 @@
+---
+title: "ADaM Generation Demo"
+format: html
+jupyter: python3
+---
+
+## Introduction
+
+This notebook demonstrates how to use the `cdiscbuilder.adamyaml` package to derive ADaM datasets from SDTM data using YAML specifications.
+
+## Setup
+Ensure the package is installed:
+
+```bash
+pip install -e ..
+```
+
+```{python}
+import os
+import yaml
+
+spec_file = "adam/specs/adsl.yaml"
+
+print(f"Using spec file: {spec_file}")
+
+# Display the content of the spec file for the demo
+# with open(spec_file, "r") as f:
+#    print(f.read())
+```
+
+## Step 2: Generate ADSL
+
+Now we use the `AdamDerivation` engine.
+
+```{python}
+from cdiscbuilder.adam import AdamDerivation
+
+print("Initializing ADaM Derivation Engine...")
+engine = AdamDerivation(spec_file)
+
+print("Building ADSL...")
+df = engine.build()
+
+print("Saving ADSL...")
+engine.save()
+
+print("ADSL Head:")
+print(df.head())
+```
+
+## Cleanup
+
+```{python}
+# os.remove(spec_file)
+```

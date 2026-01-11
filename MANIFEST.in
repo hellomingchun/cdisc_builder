@@ -1,2 +1,3 @@
-include src/cdiscbuilder/specs/*.yaml
+include src/cdiscbuilder/adam/schema.yaml
+recursive-include src/cdiscbuilder/adam/adam_spec/tests/data *.yaml
 include src/cdiscbuilder/metadata/*.yaml

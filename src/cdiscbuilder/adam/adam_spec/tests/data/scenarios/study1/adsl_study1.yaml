@@ -1,0 +1,16 @@
+parents: 
+  - ../organization/adsl_common.yaml
+  - ../project/adsl_project.yaml
+
+dir: 
+  sdtm: "../../data/sdtm"
+  adam: "../../data/adam_study1"
+  
+columns:
+
+  - name: STUDYID
+    derivation:
+      constant: "CDISCPILOT01"
+
+  - name: AGEGRP1
+    drop: True

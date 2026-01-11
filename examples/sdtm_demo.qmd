@@ -24,12 +24,13 @@ We start by parsing the raw ODM XML file into a comprehensive "Long Format" CSV.
 ```{python}
 import pandas as pd
 import os
-from cdiscbuilder.odm import parse_odm_to_long_df
+from cdiscbuilder.sdtm.odm_parser import parse_odm_to_long_df
+from cdiscbuilder.sdtm.sdtm import create_sdtm_datasets
 
 # Paths
 xml_path = "../car-t-openclinica.xml"  # Adjust path as needed
 input_csv = "odm_long.csv"
-output_dir = "output_datasets"
+output_dir = "sdtm"
 
 # Create output directory if not exists
 os.makedirs(output_dir, exist_ok=True)
@@ -48,13 +49,13 @@ df_long.head()
 ## Step 2: Custom Configuration
 
 Instead of writing mapping rules in Python, we keep them in a separate folder.
-We have created a folder named `study_specs` containing `DM.yaml` and `AE.yaml`.
+We have created a folder named `sdtm/specs` containing `DM.yaml` and `AE.yaml`.
 
 ```{python}
 import os
 
 # Define config directory
-config_dir = "study_specs"
+config_dir = "sdtm/specs"
 
 print(f"Using configurations from: {os.path.abspath(config_dir)}")
 print("Files:", os.listdir(config_dir))
@@ -65,7 +66,7 @@ print("Files:", os.listdir(config_dir))
 We pass the `my_configs` folder path directly to the generator.
 
 ```{python}
-from cdiscbuilder.sdtm import create_sdtm_datasets
+
 
 print("Generating SDTM datasets...")
 create_sdtm_datasets(config_dir, input_csv, output_dir)

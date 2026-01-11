@@ -1,0 +1,36 @@
+domain: ADSL
+key: 
+  - USUBJID
+dir:
+  sdtm: ../../sdtm
+  adam: ..
+columns:
+  - name: STUDYID
+    type: text
+    derivation:
+      source: DM.STUDYID
+  - name: USUBJID
+    type: text
+    derivation:
+      source: DM.USUBJID
+  - name: AGE
+    type: integer
+    derivation:
+      source: DM.AGE
+      type: integer
+  - name: SEX
+    type: text
+    derivation:
+      source: DM.SEX
+  - name: SAFFL
+    type: text
+    derivation:
+      constant: Y
+  - name: TRT01P
+    type: text
+    derivation:
+      source: DM.ARM
+  - name: RFSTDTC
+    type: text
+    derivation:
+      source: DM.RFSTDTC

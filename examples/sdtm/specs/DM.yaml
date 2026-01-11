@@ -1,0 +1,59 @@
+DM:
+  - formoid: "F_1DEMOGRAPHIC"
+    keys: ["StudyOID", "StudySubjectID"]
+    columns:
+      STUDYID:
+        source: "StudyOID"
+        type: "str"
+      DOMAIN:
+        literal: "DM"
+        type: "str"
+      USUBJID:
+        source: "StudySubjectID"
+        prefix: "CART-"
+        type: "str"
+      SUBJID:
+        # Fallback mechanism for demonstration
+        source: "RFSTDTC" 
+        fallback: "USUBJID"
+        type: "str"
+      RFSTDTC:
+        source: "I_1DEMO_DATE"
+        type: "str"
+      SEX:
+        source: "I_1DEMO_PTSEXEL"
+        type: "str"
+        value_mapping:
+          "Male": "M"
+          "Female": "F"
+      RACE:
+        source: "I_1DEMO_PTRACE"
+        type: "str"
+  - formoid: "F_ELIGIBILITY"
+    keys: ["StudyOID", "StudySubjectID"]
+    merge_on: ["USUBJID"]
+    columns:
+      USUBJID:
+        source: "StudySubjectID"
+        prefix: "CART-"
+        type: "str"
+      AGE:
+        source: "I_ELIGI_PTAGE"
+        type: "float"
+      AGEU:
+        literal: "YEARS"
+        type: "str"
+  - formoid: "F_3RANDOMIZE"
+    keys: ["StudyOID", "StudySubjectID"]
+    merge_on: ["USUBJID"]
+    columns:
+      USUBJID:
+         source: "StudySubjectID"
+         prefix: "CART-"
+         type: "str"
+      ARM:
+         source: "I_RANDO_ASSIGNEDARM"
+         type: "str"
+      ACTARM:
+         source: "I_RANDO_ASSIGNEDARM"
+         type: "str"

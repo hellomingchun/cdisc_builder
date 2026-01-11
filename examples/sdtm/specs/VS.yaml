@@ -1,0 +1,55 @@
+VS:
+  - type: finding
+    formoid: "F_KITCHENSINK"
+    # Capture Height, Weight, BP (Sys/Dia), Pulse
+    # Regex matches I_KITCH_HEIGHT, I_KITCH_WEIGHT, I_KITCH_BP_SYS, I_KITCH_BP_DIA, I_KITCH_PULSE
+    item_oid_regex: "I_KITCH_(HEIGHT|WEIGHT|BP_SYS|BP_DIA|PULSE).*"
+    
+    keys: ["StudyOID", "StudySubjectID", "StudyEventOID", "StudyEventRepeatKey"]
+    
+    columns:
+      STUDYID:
+        source: "StudyOID"
+      DOMAIN:
+        literal: "VS"
+      USUBJID:
+        source: "StudySubjectID"
+        prefix: "CART-"
+      VSDTC:
+        source: "StudyEventStartDate"
+      VSSEQ:
+        group: ["USUBJID"]
+        sort_by: ["VSDTC"]
+        type: int
+      VSTESTCD:
+        source: "ItemOID"
+        # Extract the suffix (e.g. HEIGHT from I_KITCH_HEIGHT)
+        regex_extract: "I_KITCH_(.*)"
+      VSTEST:
+        source: "ItemName"
+      VSORRES:
+        source: "Value"
+      VSSTRESC:
+        source: "Value"
+      VSSTRESU:
+        source: "ItemOID"
+        value_mapping:
+          I_KITCH_HEIGHT: "cm"
+          I_KITCH_WEIGHT: "kg"
+          I_KITCH_BP_SYS: "mmHg"
+          I_KITCH_BP_DIA: "mmHg"
+          I_KITCH_BP_SYS_MEAN: "mmHg"
+          I_KITCH_BP_DIA_MEAN: "mmHg"
+          I_KITCH_PULSE: "beats/min"
+          I_KITCH_PULSE_VAL: "beats/min"
+      VSORRESU:
+        source: "ItemOID"
+        value_mapping:
+          I_KITCH_HEIGHT: "cm"
+          I_KITCH_WEIGHT: "kg"
+          I_KITCH_BP_SYS: "mmHg"
+          I_KITCH_BP_DIA: "mmHg"
+          I_KITCH_BP_SYS_MEAN: "mmHg"
+          I_KITCH_BP_DIA_MEAN: "mmHg"
+          I_KITCH_PULSE: "beats/min"
+          I_KITCH_PULSE_VAL: "beats/min"

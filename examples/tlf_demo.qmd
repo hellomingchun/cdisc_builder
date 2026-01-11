@@ -1,0 +1,47 @@
+---
+title: "TLF Generation Demo"
+format: html
+jupyter: python3
+---
+
+## Introduction
+
+This demo illustrates the configuration for creating Tables, Listings, and Figures (TLFs) using the `cdiscbuilder.tlfyaml` specifications.
+
+## Setup
+
+Specifications are defined in YAML. Below is an example of a table definition file `tlf_demo.yaml` that would produce a Demographics table.
+
+## Specification
+
+```{python}
+import yaml
+
+spec_file = "tlf/specs/tlf_demo.yaml"
+with open(spec_file, "r") as f:
+    print(f.read())
+```
+
+## Generation
+
+The execution engine for these specifications is currently being integrated. In the full workflow, one would run:
+
+```python
+
+# Define directories
+import os
+
+sdtm_dir = os.path.abspath("sdtm")
+adam_dir = os.path.abspath("adam")
+tlf_dir = os.path.abspath("tlf")
+os.makedirs(tlf_dir, exist_ok=True)
+
+print(f"SDTM Directory: {sdtm_dir}")
+print(f"ADaM Directory: {adam_dir}")
+print(f"TLF Directory: {tlf_dir}")
+
+# from cdiscbuilder.tlf import generate_table
+# generate_table(spec_file, data_dir=adam_dir, output_dir=tlf_dir)
+```
+
+For now, this demo serves to document the intended structure.

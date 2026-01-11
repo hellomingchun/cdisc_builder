@@ -1,0 +1,13 @@
+plan:
+  - name: dm_table_01
+    population: adsl
+    observation: None
+    group: trt01p
+    title: "Demographics and Baseline Characteristics"
+    columns:
+      - variable: AGE
+        label: "Age (years)"
+        stats: [n, mean, std, min, max]
+      - variable: SEX
+        label: "Sex"
+        stats: [n, count_pct]

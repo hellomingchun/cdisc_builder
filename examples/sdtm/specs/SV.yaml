@@ -1,0 +1,33 @@
+SV:
+  # Trigger on all available forms to ensure we capture every visit event
+  - formoid: [
+      "F_1DEMOGRAPHIC", "F_2BASELINELAB", "F_3RANDOMIZE", "F_ADVERSEEVENT", 
+      "F_CONMED", "F_ELIGIBILITY", "F_KITCHENSINK", "F_4VIEWRANDOMI", 
+      "F_LABRESULTS", "F_INCLINICPHOT", "F_SOURCEDOCUME", "F_RXNORMCODING", 
+      "F_SUSPECTEDMI", "F_RANDSF12", "F_EVALUATORA", "F_COMMITTEEREV", "F_DISPOSITION"
+    ]
+    
+    # Group by Event (Visit), collapsing multiple forms in the same event into one row
+    # MUST include all columns we want to source directly from the metadata level (attributes)
+    keys: ["StudyOID", "StudySubjectID", "StudyEventOID", "StudyEventRepeatKey", "StudyEventStartDate"]
+    
+    columns:
+      STUDYID:
+        source: "StudyOID"
+        type: "str"
+      DOMAIN:
+        literal: "SV"
+        type: "str"
+      USUBJID:
+        source: "StudySubjectID" 
+        prefix: "CART-"
+        type: "str"
+      VISIT:
+        source: "StudyEventOID"
+        type: "str"
+      VISITNUM:
+        source: "StudyEventRepeatKey"
+        type: "int"
+      SVSTDTC:
+        source: "StudyEventStartDate"
+        type: "str"

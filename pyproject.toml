@@ -4,12 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cdiscbuilder"
-version = "1.0.3"
+version = "1.0.4"
 description = "A package to convert ODM XML to SDTM/ADaM Datasets"
 authors = [{name = "Ming-Chun Chen", email = "hellomingchun@gmail.com"}]
 dependencies = [
     "pandas",
-    "pyyaml"
+    "pyyaml",
+    "polars>=0.20.0",
+    "reactable>=0.1.6"
 ]
 requires-python = ">=3.8"
 
@@ -17,7 +19,7 @@ requires-python = ">=3.8"
 cdisc-sdtm = "cdiscbuilder.cli:main"
 
 [tool.setuptools.package-data]
-cdiscbuilder = ["specs/*.yaml", "engine/classes/*.py"]
+cdiscbuilder = ["adam/schema.yaml", "adam/adam_spec/tests/data/scenarios/**/*.yaml"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

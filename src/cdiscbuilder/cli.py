@@ -1,7 +1,7 @@
 import os
 import argparse
-from .odm import parse_odm_to_long_df
-from .sdtm import create_sdtm_datasets
+from .sdtm.odm_parser import parse_odm_to_long_df
+from .sdtm.sdtm import create_sdtm_datasets
 
 def main():
     parser = argparse.ArgumentParser(description="Convert ODM XML to SDTM Datasets")
