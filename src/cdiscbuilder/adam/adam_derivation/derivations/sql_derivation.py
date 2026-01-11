@@ -359,7 +359,7 @@ class SQLDerivation(BaseDerivation):
                     # Get the row with minimum difference
                     closest_row = with_diff.filter(
                         pl.col("date_diff") == with_diff["date_diff"].min()
-                    )
+                    ).head(1)
 
                     if closest_row.height > 0:
                         result_list.append(closest_row[source_col][0])
