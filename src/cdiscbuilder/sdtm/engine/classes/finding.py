@@ -144,7 +144,7 @@ class FindingProcessor:
                             elif target_type == 'bool':
                                 series = series.astype(bool)
                             elif target_type == 'date':
-                                series = pd.to_datetime(series, errors='coerce', format='mixed')
+                                series = pd.to_datetime(series, errors='coerce', format='mixed').dt.strftime('%Y-%m-%d')
                         except Exception as e:
                             print(f"Error converting {target_col} to {target_type}: {e}")
                     

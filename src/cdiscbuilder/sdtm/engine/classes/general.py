@@ -275,10 +275,8 @@ class GeneralProcessor:
                         elif target_type == 'bool':
                             series = series.astype(bool)
                         elif target_type == 'date':
-                            # Convert to datetime objects (handles multiple formats)
-                            # This will produce datetime64[ns], which Parquet stores as Timestamp/Date
-                            # Use format='mixed' to handle ISO, US, Date-only vs DateTime mixed columns
-                            series = pd.to_datetime(series, errors='coerce', format='mixed')
+                            # Convert to datetime objects (handles multiple formats) then Format to YYYY-MM-DD string
+                            series = pd.to_datetime(series, errors='coerce', format='mixed').dt.strftime('%Y-%m-%d')
                     except Exception as e:
                         print(f"Error converting {target_col} to {target_type}: {e}")
 
