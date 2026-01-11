@@ -322,8 +322,13 @@ class SQLDerivation(BaseDerivation):
         else:
             filtered_df = merged_df
 
-        # Get the date column for VS dataset
-        date_col = f"{dataset_name}.VSDTC" if dataset_name == "VS" else f"{dataset_name}.DTC"
+        # Get the date column for VS/FA/Other dataset
+        if dataset_name == "VS":
+            date_col = f"{dataset_name}.VSDTC"
+        elif dataset_name == "FA":
+            date_col = f"{dataset_name}.FADTC"
+        else:
+            date_col = f"{dataset_name}.DTC"
 
         # Get unique subjects to iterate over
         unique_subjects = self.target_df[key_vars[0]].unique().to_list()
