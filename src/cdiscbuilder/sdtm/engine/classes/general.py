@@ -274,6 +274,11 @@ class GeneralProcessor:
                             series = series.astype(str)
                         elif target_type == 'bool':
                             series = series.astype(bool)
+                        elif target_type == 'date':
+                            # Convert to datetime objects (handles multiple formats)
+                            # This will produce datetime64[ns], which Parquet stores as Timestamp/Date
+                            # Use format='mixed' to handle ISO, US, Date-only vs DateTime mixed columns
+                            series = pd.to_datetime(series, errors='coerce', format='mixed')
                     except Exception as e:
                         print(f"Error converting {target_col} to {target_type}: {e}")
 

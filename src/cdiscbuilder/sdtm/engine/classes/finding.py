@@ -137,10 +137,16 @@ class FindingProcessor:
                         try:
                             if target_type == 'int':
                                 series = pd.to_numeric(series, errors='coerce').astype('Int64')
+                            elif target_type == 'float':
+                                 series = pd.to_numeric(series, errors='coerce')
                             elif target_type == 'str':
                                 series = series.astype(str)
-                        except Exception:
-                            pass
+                            elif target_type == 'bool':
+                                series = series.astype(bool)
+                            elif target_type == 'date':
+                                series = pd.to_datetime(series, errors='coerce', format='mixed')
+                        except Exception as e:
+                            print(f"Error converting {target_col} to {target_type}: {e}")
                     
                     final_df[target_col] = series
             
