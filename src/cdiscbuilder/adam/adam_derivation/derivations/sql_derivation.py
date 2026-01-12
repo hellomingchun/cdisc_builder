@@ -24,14 +24,23 @@ class SQLDerivation(BaseDerivation):
         key_vars = self.col_spec.get("_key_vars", ["USUBJID"])
 
         # Dispatch to appropriate SQL generator
+        series: pl.Series
         if "constant" in derivation:
-            return self._derive_constant(derivation["constant"])
+            series = self._derive_constant(derivation["constant"])
         elif "source" in derivation:
-            return self._derive_source(derivation, key_vars)
+            series = self._derive_source(derivation, key_vars)
         elif "cut" in derivation:
-            return self._derive_cut(derivation)
+            series = self._derive_cut(derivation)
         else:
             raise ValueError(f"Unknown derivation type for {col_name}")
+
+        # Post-processing: Value Mapping
+        # Support both inside derivation (legacy) and outside (col_spec)
+        mapping_value = self.col_spec.get("mapping_value") or derivation.get("mapping_value")
+        if mapping_value:
+             series = self._apply_mapping(series, mapping_value)
+
+        return series
 
     def _derive_constant(self, value: Any) -> pl.Series:
         """Create a constant value column."""
@@ -43,37 +52,44 @@ class SQLDerivation(BaseDerivation):
         source = derivation["source"]
 
         # Parse source reference (e.g., "DM.AGE" or "AGE")
+        # Parse source reference (e.g., "DM.AGE" or "AGE")
+        series: pl.Series
+        
         if "." in source:
             dataset_name, column_name = source.split(".", 1)
             source_col = f"{dataset_name}.{column_name}"
+            
+            # Build SQL query
+
+            # Handle aggregation
+            if "aggregation" in derivation:
+                agg_spec = derivation["aggregation"]
+                sql_query = self._build_aggregation_sql(
+                    source_col, agg_spec, derivation.get("filter"), key_vars
+                )
+            else:
+                # Simple source with optional filter
+                sql_query = self._build_source_sql(
+                    source_col, derivation.get("filter"), derivation.get("mapping"), key_vars
+                )
+
+            # Execute SQL using Polars SQL context
+            series = self._execute_sql(sql_query, key_vars)
+            
         else:
             # Column from target dataset
             if source in self.target_df.columns:
                 series = self.target_df[source]
             else:
+                # If source is not in target, check if it's meant to be from source data implicitly?
+                # The original code raised ValueError here.
                 raise ValueError(f"Column {source} not found in target dataset")
 
-            # Apply mapping if present
+            # Apply mapping if present (legacy / optimization for local cols)
             if "mapping" in derivation:
-                return self._apply_mapping(series, derivation["mapping"])
-            return series
+                series = self._apply_mapping(series, derivation["mapping"])
 
-        # Build SQL query
-
-        # Handle aggregation
-        if "aggregation" in derivation:
-            agg_spec = derivation["aggregation"]
-            sql_query = self._build_aggregation_sql(
-                source_col, agg_spec, derivation.get("filter"), key_vars
-            )
-        else:
-            # Simple source with optional filter
-            sql_query = self._build_source_sql(
-                source_col, derivation.get("filter"), derivation.get("mapping"), key_vars
-            )
-
-        # Execute SQL using Polars SQL context
-        return self._execute_sql(sql_query, key_vars)
+        return series
 
     def _derive_cut(self, derivation: dict[str, Any]) -> pl.Series:
         """Derive using cut (categorization) logic."""
@@ -383,13 +399,15 @@ class SQLDerivation(BaseDerivation):
 
     def _apply_mapping(self, series: pl.Series, mapping: dict[str, str]) -> pl.Series:
         """Apply value mapping to a series."""
-
-        # Build when/then chains
-        result = series
-        for old_val, new_val in mapping.items():
-            if new_val == "Null" or new_val is None:
-                result = pl.when(result == old_val).then(None).otherwise(result)
-            else:
-                result = pl.when(result == old_val).then(new_val).otherwise(result)
-
-        return result  # pyre-ignore[7]
+        if not mapping:
+            return series
+            
+        # Use Polars replace (efficient dictionary mapping)
+        # Note: In newer Polars versions, replace is preferred for this
+        try:
+             # Handle "Null" string in config as actual None
+             clean_mapping = {k: (None if v == "Null" else v) for k, v in mapping.items()}
+             return series.replace(clean_mapping)
+        except Exception as e:
+             logger.warning(f"Mapping failed: {e}")
+             return series
