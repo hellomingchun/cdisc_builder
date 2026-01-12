@@ -40,12 +40,69 @@ class SQLDerivation(BaseDerivation):
         if mapping_value:
              series = self._apply_mapping(series, mapping_value)
 
+        # Post-processing: Cut (Categorization)
+        if "cut" in derivation:
+            series = self._apply_cut(series, derivation["cut"])
+
         return series
 
     def _derive_constant(self, value: Any) -> pl.Series:
         """Create a constant value column."""
         return pl.Series([value] * self.target_df.height)
 
+    def _apply_cut(self, series: pl.Series, cuts: dict[str, str]) -> pl.Series:
+        """Apply cut logic to an existing series using temporary SQL context."""
+        
+        # We perform the cut logic by creating a temporary DataFrame with the series
+        # and running the SQL generation logic on it.
+        temp_col = "_val"
+        temp_df = pl.DataFrame({temp_col: series})
+        source = temp_col
+        
+        # Build CASE expression (logic lifted from original _derive_cut)
+        case_parts = []
+        for condition, label in cuts.items():
+            # Convert condition syntax to SQL
+            sql_condition = condition.replace("and", "AND").replace("or", "OR")
+            sql_condition = sql_condition.replace(">=", "___GTE___")
+            sql_condition = sql_condition.replace("<=", "___LTE___")
+            sql_condition = sql_condition.replace(">", "___GT___")
+            sql_condition = sql_condition.replace("<", "___LT___")
+            sql_condition = sql_condition.replace("=", "___EQ___")
+
+            # Now replace back with source reference
+            sql_condition = sql_condition.replace("___GTE___", f">= {source} AND {source} >=")
+            sql_condition = sql_condition.replace("___LTE___", f"<= {source} AND {source} <=")
+            sql_condition = sql_condition.replace("___GT___", f"> {source} AND {source} >")
+            sql_condition = sql_condition.replace("___LT___", f"< {source} AND {source} <")
+            sql_condition = sql_condition.replace("___EQ___", f"= {source} AND {source} =")
+
+            # Clean up the condition
+            if condition.startswith("<"):
+                value = condition[1:].strip()
+                case_parts.append(f"WHEN {source} < {value} THEN '{label}'")
+            elif condition.startswith(">=") and " and " in condition.lower():
+                parts = condition.split(" and ")
+                lower = parts[0].replace(">=", "").strip()
+                upper = parts[1].replace("<", "").strip()
+                case_parts.append(f"WHEN {source} >= {lower} AND {source} < {upper} THEN '{label}'")
+            elif condition.startswith(">="):
+                value = condition[2:].strip()
+                case_parts.append(f"WHEN {source} >= {value} THEN '{label}'")
+            else:
+                # Generic condition
+                case_parts.append(f"WHEN {condition} THEN '{label}'")
+
+        case_expr = "CASE " + " ".join(case_parts) + " ELSE NULL END"
+
+        # Execute using Polars expressions
+        ctx = pl.SQLContext(frame=temp_df)
+        try:
+            result_df = ctx.execute(f"SELECT {case_expr} as result FROM frame").collect()
+            return result_df["result"]
+        except Exception as e:
+            logger.warning(f"Cut execution failed: {e}")
+            return pl.Series([None] * len(series))
     def _derive_source(self, derivation: dict[str, Any], key_vars: list[str]) -> pl.Series:
         """Derive from source with optional mapping, filter, and aggregation."""
 
