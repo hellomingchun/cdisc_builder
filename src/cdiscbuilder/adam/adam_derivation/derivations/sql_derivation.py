@@ -37,8 +37,10 @@ class SQLDerivation(BaseDerivation):
         # Post-processing: Value Mapping
         # Support both inside derivation (legacy) and outside (col_spec)
         mapping_value = self.col_spec.get("mapping_value") or derivation.get("mapping_value")
+        mapping_default = self.col_spec.get("mapping_default") or derivation.get("mapping_default")
+        
         if mapping_value:
-             series = self._apply_mapping(series, mapping_value)
+             series = self._apply_mapping(series, mapping_value, default=mapping_default)
 
         # Post-processing: Cut (Categorization)
         if "cut" in derivation:
@@ -454,7 +456,7 @@ class SQLDerivation(BaseDerivation):
         )
         return pl.Series(result)
 
-    def _apply_mapping(self, series: pl.Series, mapping: dict[str, str]) -> pl.Series:
+    def _apply_mapping(self, series: pl.Series, mapping: dict[str, str], default: Any = None) -> pl.Series:
         """Apply value mapping to a series."""
         if not mapping:
             return series
@@ -464,7 +466,11 @@ class SQLDerivation(BaseDerivation):
         try:
              # Handle "Null" string in config as actual None
              clean_mapping = {k: (None if v == "Null" else v) for k, v in mapping.items()}
-             return series.replace(clean_mapping)
+             
+             if default is not None:
+                 return series.replace(clean_mapping, default=default)
+             else:
+                 return series.replace(clean_mapping)
         except Exception as e:
              logger.warning(f"Mapping failed: {e}")
              return series
