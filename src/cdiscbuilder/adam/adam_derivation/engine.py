@@ -105,8 +105,36 @@ class AdamDerivation:
         self.logger.info(f"Deriving {col_spec['name']} using {derivation_obj.__class__.__name__}")
 
         # Setup context and derive
+        # Setup context and derive
         derivation_obj.setup(col_spec, self.source_data, self.target_df)
         derived_series = derivation_obj.derive()
+        
+        # Enforce Type
+        target_type = col_spec.get("type")
+        if target_type:
+            try:
+                if target_type == "int":
+                    derived_series = derived_series.cast(pl.Int64, strict=False)
+                elif target_type == "float":
+                    derived_series = derived_series.cast(pl.Float64, strict=False)
+                elif target_type == "str":
+                    derived_series = derived_series.cast(pl.Utf8, strict=False)
+                elif target_type == "bool":
+                    if derived_series.dtype == pl.Utf8:
+                        lower = derived_series.str.to_lowercase()
+                        res = (
+                            pl.when(lower.is_in(["true", "yes", "y", "1"]))
+                            .then(True)
+                            .when(lower.is_in(["false", "no", "n", "0"]))
+                            .then(False)
+                            .otherwise(None)
+                        )
+                        derived_series = res
+                    else:
+                        derived_series = derived_series.cast(pl.Boolean, strict=False)
+            except Exception as e:
+                self.logger.warning(f"Type enforcement failed for {col_spec['name']} ({target_type}): {e}")
+
         self.target_df = self.target_df.with_columns(derived_series.alias(col_spec["name"]))
 
     def build(self) -> pl.DataFrame:
