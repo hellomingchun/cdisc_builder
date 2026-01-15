@@ -327,13 +327,16 @@ class SQLDerivation(BaseDerivation):
             result_df = ctx.execute(sql_quoted).collect()
 
             # Handle result based on size
-            if len(result_df) == len(self.target_df):
-                # Direct assignment
-                return result_df["result"]
-            elif len(result_df) < len(self.target_df) and len(key_vars) > 0:
-                # Need to join to get all rows
+            # Fix: Always join if keys vary to ensure order safety
+            # Previous optimization (len check) was unsafe for SQL aggregation
+            if len(key_vars) > 0:
+                # Join to get all rows aligned correctly
                 final_df = self.target_df.select(key_vars).join(result_df, on=key_vars, how="left")
                 return final_df["result"]
+            
+            elif len(result_df) == len(self.target_df):
+                 # No keys (rare), assume safe only if 1:1 and no order change (risky but fallback)
+                 return result_df["result"]
             else:
                 # Fallback - ensure we return right number of rows
                 return pl.Series([None] * self.target_df.height)
