@@ -132,6 +132,16 @@ CUSTOM_COL:
   mapping_default: "Other" # used if not A
   # mapping_default_source: "AnotherCol" # Fallback to column value
 ```
+
+**Case Sensitive Mapping**:
+By default, mapping is case-sensitive. You can disable this to map values regardless of case (e.g. "Yes", "yes", "YES" -> "Y"). Unmapped values preserve their original casing.
+```yaml
+RESP:
+  source: INPUT_VAL
+  value_mapping:
+    "Yes": "Y"
+    "No": "N"
+  case_sensitive: false
 ```
 
 ## License

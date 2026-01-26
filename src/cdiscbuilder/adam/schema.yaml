@@ -8,6 +8,7 @@ definitions:
       type: {type: str, enum: [str, int, float, bool]}
       max_missing_pct: {type: [int, float]}
       value_mapping: {type: dict}
+      case_sensitive: {type: bool}
       prefix: {type: str}
       substring_start: {type: int}
       substring_length: {type: int}
@@ -33,6 +34,7 @@ definitions:
       formoid: {type: [str, list]}
       itemoid: {type: [str, list]}
       value_mapping: {type: dict}
+      case_sensitive: {type: bool}
       prefix: {type: str}
       substring_start: {type: int}
       substring_length: {type: int}

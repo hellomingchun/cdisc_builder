@@ -36,11 +36,16 @@ class SQLDerivation(BaseDerivation):
 
         # Post-processing: Value Mapping
         # Support both inside derivation (legacy) and outside (col_spec)
-        mapping_value = self.col_spec.get("mapping_value") or derivation.get("mapping_value")
+        value_mapping = self.col_spec.get("value_mapping") or derivation.get("value_mapping") or self.col_spec.get("mapping_value") or derivation.get("mapping_value")
         mapping_default = self.col_spec.get("mapping_default") or derivation.get("mapping_default")
         
-        if mapping_value:
-             series = self._apply_mapping(series, mapping_value, default=mapping_default)
+        # Check for case sensitivity setting (default is True)
+        case_sensitive = self.col_spec.get("case_sensitive")
+        if case_sensitive is None:
+            case_sensitive = derivation.get("case_sensitive", True)
+        
+        if value_mapping:
+             series = self._apply_mapping(series, value_mapping, default=mapping_default, case_sensitive=case_sensitive)
 
         # Post-processing: Cut (Categorization)
         if "cut" in derivation:
@@ -459,21 +464,50 @@ class SQLDerivation(BaseDerivation):
         )
         return pl.Series(result)
 
-    def _apply_mapping(self, series: pl.Series, mapping: dict[str, str], default: Any = None) -> pl.Series:
+    def _apply_mapping(self, series: pl.Series, mapping: dict[str, str], default: Any = None, case_sensitive: bool = True) -> pl.Series:
         """Apply value mapping to a series."""
         if not mapping:
             return series
             
-        # Use Polars replace (efficient dictionary mapping)
-        # Note: In newer Polars versions, replace is preferred for this
         try:
              # Handle "Null" string in config as actual None
              clean_mapping = {k: (None if v == "Null" else v) for k, v in mapping.items()}
              
-             if default is not None:
-                 return series.replace(clean_mapping, default=default)
+             if not case_sensitive:
+                 # Case insensitive logic
+                 lower_mapping = {k.lower(): v for k, v in clean_mapping.items()}
+                 lower_series = series.str.to_lowercase()
+                 
+                 if default is not None:
+                     # If default is provided, replace works nicely on lower_series
+                     return lower_series.replace(lower_mapping, default=default)
+                 else:
+                     # If no default (keep original), we only want to replace MATCHES
+                     # replace() on lower_series will return lowercased originals for non-matches
+                     # So we use when/then to conditionally apply the mapping
+                     mapped_lower = lower_series.replace(lower_mapping)
+                     is_mapped = lower_series.is_in(list(lower_mapping.keys()))
+
+                     # Must execute the expression to get a Series
+                     temp_df = pl.DataFrame({
+                         "original": series,
+                         "mapped": mapped_lower,
+                         "mask": is_mapped
+                     })
+                     
+                     return temp_df.select(
+                         pl.when(pl.col("mask"))
+                         .then(pl.col("mapped"))
+                         .otherwise(pl.col("original"))
+                     ).to_series()
+             
              else:
-                 return series.replace(clean_mapping)
+                 # Standard strict mapping (Default)
+                 if default is not None:
+                     return series.replace(clean_mapping, default=default)
+                 else:
+                     return series.replace(clean_mapping)
+
         except Exception as e:
              logger.warning(f"Mapping failed: {e}")
              return series

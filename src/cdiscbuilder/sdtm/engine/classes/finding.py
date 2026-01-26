@@ -117,11 +117,24 @@ class FindingProcessor:
                 
                 # Value Map
                 value_map = None
+                case_sensitive = True
                 if isinstance(col_config, dict):
-                    value_map = col_config.get('value_mapping')
+                    value_map = col_config.get('value_mapping') or col_config.get('mapping_value')
+                    case_sensitive = col_config.get('case_sensitive', True)
                 
                 if value_map and series is not None:
-                     series = series.map(value_map)
+                     if not case_sensitive:
+                         # Case insensitive mapping (partial replacement behavior by default here?)
+                         # finding.py implemented .map() which is strict (NaN for unmapped)
+                         # Assuming we want to maintain that behavior unless specified otherwise?
+                         # Actually .map() is strict. The previous code series = series.map(value_map) implies strict mapping.
+                         
+                         clean_map = {k: v for k, v in value_map.items()}
+                         lower_map = {str(k).lower(): v for k, v in clean_map.items()}
+                         series_lower = series.astype(str).str.lower()
+                         series = series_lower.map(lower_map)
+                     else:
+                         series = series.map(value_map)
                 
                 # Apply Prefix
                 prefix = None

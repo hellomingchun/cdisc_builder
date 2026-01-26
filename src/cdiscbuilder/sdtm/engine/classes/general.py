@@ -117,12 +117,17 @@ class GeneralProcessor:
                     fallback_expr = col_config.get('fallback')
                     literal_expr = col_config.get('literal')
                     target_type = col_config.get('type')
-                    value_map = col_config.get('value_mapping')
+                    # Support value_mapping (primary) and mapping_value (legacy/typo support)
+                    value_map = col_config.get('value_mapping') or col_config.get('mapping_value')
+                    case_sensitive = col_config.get('case_sensitive', True)
                     group_cols = col_config.get('group')
                     sort_cols = col_config.get('sort_by')
                 else:
                     source_expr = col_config
                     literal_expr = None
+                    fallback_expr = None
+                    value_map = None
+                    case_sensitive = True
                     group_cols = None
                     sort_cols = None
                 
@@ -235,8 +240,19 @@ class GeneralProcessor:
                 mapping_default_source = col_config.get('mapping_default_source') if isinstance(col_config, dict) else None
 
                 if value_map:
-                    # Perform mapping (non-matches become NaN)
-                    mapped_series = series.map(value_map)
+                    # Perform mapping
+                    if not case_sensitive:
+                         # Case Insensitive Mapping
+                         # Clean map of nulls if needed, then lowercase keys
+                         clean_map = {k: v for k, v in value_map.items()}
+                         lower_map = {str(k).lower(): v for k, v in clean_map.items()}
+                         
+                         # Convert series to lower for mapping lookup
+                         series_lower = series.astype(str).str.lower()
+                         mapped_series = series_lower.map(lower_map)
+                    else:
+                         # Strict mapping
+                         mapped_series = series.map(value_map)
                     
                     if mapping_default is not None:
                          # Strict mapping with default literal
@@ -255,8 +271,19 @@ class GeneralProcessor:
                              print(f"Warning: Default source '{mapping_default_source}' not found for '{domain_name}.{target_col}'")
                              series = mapped_series # Leave as NaN or original? mapped_series has NaNs.
                     else:
-                         # Partial replacement (legacy: keep original values if not in map)
-                         series = series.replace(value_map)
+                         # Partial replacement (keep original values if not in map)
+                         # If strict, .map() gave NaNs. combine_first puts original back.
+                         if not case_sensitive:
+                             # For case insensitive, mapped_series has mapped values or NaN. 
+                             # We fill NaN with original series.
+                             series = mapped_series.combine_first(series)
+                         else:
+                             # For strict, .replace() behavior is desired (partial)
+                             # series.map() returns NaNs for non-matches.
+                             # series.replace() keeps originals.
+                             # But valid map might map VALID keys to None/NaN. 
+                             # So using replace() is safer for partial.
+                             series = series.replace(value_map)
 
                 # Apply Prefix
                 prefix = col_config.get('prefix') if isinstance(col_config, dict) else None
