@@ -185,6 +185,13 @@ class GeneralProcessor:
                         # Source defined but not found.
                         print(f"Warning: Source column '{source_expr}' not found for '{domain_name}.{target_col}'. Filling with NaN.")
                         series = pd.Series([None] * len(pivoted))
+                    
+                    # Auto-Strip Whitespace for strings
+                    if series is not None and pd.api.types.is_object_dtype(series):
+                        try:
+                            series = series.astype(str).str.strip().replace('nan', None)
+                        except:
+                            pass
                 else:
                     print(f"Warning: No source or literal defined for '{domain_name}.{target_col}'. Filling with NaN.")
                     series = pd.Series([None] * len(pivoted))

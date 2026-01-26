@@ -149,9 +149,13 @@ class SQLDerivation(BaseDerivation):
                 # The original code raised ValueError here.
                 raise ValueError(f"Column {source} not found in target dataset")
 
-            # Apply mapping if present (legacy / optimization for local cols)
-            if "mapping" in derivation:
-                series = self._apply_mapping(series, derivation["mapping"])
+        # Auto-Strip Whitespace
+        if series.dtype == pl.Utf8:
+             series = series.str.strip_chars()
+
+        # Apply mapping if present (legacy / optimization for local cols)
+        if "mapping" in derivation:
+            series = self._apply_mapping(series, derivation["mapping"])
 
         return series
 

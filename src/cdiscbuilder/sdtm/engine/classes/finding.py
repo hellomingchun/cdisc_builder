@@ -111,6 +111,10 @@ class FindingProcessor:
                     elif source_expr in source_df.columns:
                          series = source_df[source_expr]
                     
+                    # Auto-Strip
+                    if series is not None and pd.api.types.is_object_dtype(series):
+                         series = series.astype(str).str.strip().replace('nan', None)
+                    
                     if regex_extract and series is not None:
                          # Extract group 1
                          series = series.astype(str).str.extract(regex_extract)[0]
