@@ -429,16 +429,22 @@ class SQLDerivation(BaseDerivation):
                 # Calculate distance to target date
                 if target_col in subject_data.columns and date_col in subject_data.columns:
                     # Get target date (should be same for all rows of this subject)
-                    target_date = subject_data[target_col][0]
-
                     # Calculate date differences and find closest
-                    # Handle partial dates by using strptime with appropriate format
+                    # Handle multiple formats: "YYYY-MM-DD HH:MM:SS", "YYYY-MM-DDTHH:MM:SS" (ISO), or "YYYY-MM-DD"
+                    # We convert everything to Datetime for precision comparison (ms level)
+                    def parse_to_datetime(expr: pl.Expr) -> pl.Expr:
+                        return (
+                            expr.str.strptime(pl.Datetime, "%Y-%m-%d %H:%M:%S", strict=False)
+                            .fill_null(expr.str.strptime(pl.Datetime, "%Y-%m-%dT%H:%M:%S", strict=False))
+                            .fill_null(expr.str.strptime(pl.Date, "%Y-%m-%d", strict=False).cast(pl.Datetime))
+                        )
+
                     with_diff = subject_data.with_columns(
                         (
-                            pl.col(date_col).str.strptime(pl.Date, "%Y-%m-%d", strict=False)
-                            - pl.lit(target_date).str.strptime(pl.Date, "%Y-%m-%d", strict=False)
+                            parse_to_datetime(pl.col(date_col))
+                            - parse_to_datetime(pl.lit(target_date))
                         )
-                        .dt.total_days()
+                        .dt.total_milliseconds()
                         .abs()
                         .alias("date_diff")
                     )
