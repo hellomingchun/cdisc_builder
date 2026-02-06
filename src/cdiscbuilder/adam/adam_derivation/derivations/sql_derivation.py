@@ -92,26 +92,52 @@ class SQLDerivation(BaseDerivation):
             sql_condition = sql_condition.replace("___LT___", f"< {source} AND {source} <")
             sql_condition = sql_condition.replace("___EQ___", f"= {source} AND {source} =")
 
-            # Clean up the condition
-            if condition.startswith("<"):
+            # Clean up the condition - handle all comparison operators
+            if " and " in condition.lower():
+                # Range condition: handle >=X and <Y, >X and <=Y, etc.
+                parts = condition.lower().split(" and ")
+                lower_part = parts[0].strip()
+                upper_part = parts[1].strip()
+                
+                # Parse lower bound (>= or >)
+                if lower_part.startswith(">="):
+                    lower_val = lower_part.replace(">=", "").strip()
+                    lower_op = ">="
+                elif lower_part.startswith(">"):
+                    lower_val = lower_part.replace(">", "").strip()
+                    lower_op = ">"
+                else:
+                    # Fallback for unexpected format
+                    case_parts.append(f"WHEN {condition} THEN '{label}'")
+                    continue
+                
+                # Parse upper bound (<= or <)
+                if upper_part.startswith("<="):
+                    upper_val = upper_part.replace("<=", "").strip()
+                    upper_op = "<="
+                elif upper_part.startswith("<"):
+                    upper_val = upper_part.replace("<", "").strip()
+                    upper_op = "<"
+                else:
+                    # Fallback for unexpected format
+                    case_parts.append(f"WHEN {condition} THEN '{label}'")
+                    continue
+                
+                case_parts.append(f"WHEN {source} {lower_op} {lower_val} AND {source} {upper_op} {upper_val} THEN '{label}'")
+            elif condition.startswith("<="):
+                value = condition[2:].strip()
+                case_parts.append(f"WHEN {source} <= {value} THEN '{label}'")
+            elif condition.startswith("<"):
                 value = condition[1:].strip()
                 case_parts.append(f"WHEN {source} < {value} THEN '{label}'")
-            elif condition.startswith(">=") and " and " in condition.lower():
-                parts = condition.split(" and ")
-                lower = parts[0].replace(">=", "").strip()
-                upper_part = parts[1].strip()
-                # Handle both <= and < for upper bound
-                if "<=" in upper_part:
-                    upper = upper_part.replace("<=", "").strip()
-                    case_parts.append(f"WHEN {source} >= {lower} AND {source} <= {upper} THEN '{label}'")
-                else:
-                    upper = upper_part.replace("<", "").strip()
-                    case_parts.append(f"WHEN {source} >= {lower} AND {source} < {upper} THEN '{label}'")
             elif condition.startswith(">="):
                 value = condition[2:].strip()
                 case_parts.append(f"WHEN {source} >= {value} THEN '{label}'")
+            elif condition.startswith(">"):
+                value = condition[1:].strip()
+                case_parts.append(f"WHEN {source} > {value} THEN '{label}'")
             else:
-                # Generic condition
+                # Generic condition (pass through as-is)
                 case_parts.append(f"WHEN {condition} THEN '{label}'")
 
         case_expr = "CASE " + " ".join(case_parts) + " ELSE NULL END"
