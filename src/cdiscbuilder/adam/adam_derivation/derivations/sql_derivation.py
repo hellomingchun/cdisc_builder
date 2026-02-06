@@ -63,7 +63,15 @@ class SQLDerivation(BaseDerivation):
         # We perform the cut logic by creating a temporary DataFrame with the series
         # and running the SQL generation logic on it.
         temp_col = "_val"
-        temp_df = pl.DataFrame({temp_col: series})
+        
+        # Cast to Float64 for numeric comparisons (handles string source data)
+        try:
+            numeric_series = series.cast(pl.Float64)
+        except Exception:
+            # If cast fails, try to keep as-is (maybe it's already numeric)
+            numeric_series = series
+            
+        temp_df = pl.DataFrame({temp_col: numeric_series})
         source = temp_col
         
         # Build CASE expression (logic lifted from original _derive_cut)
