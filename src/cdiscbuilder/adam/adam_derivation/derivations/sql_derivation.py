@@ -99,8 +99,14 @@ class SQLDerivation(BaseDerivation):
             elif condition.startswith(">=") and " and " in condition.lower():
                 parts = condition.split(" and ")
                 lower = parts[0].replace(">=", "").strip()
-                upper = parts[1].replace("<", "").strip()
-                case_parts.append(f"WHEN {source} >= {lower} AND {source} < {upper} THEN '{label}'")
+                upper_part = parts[1].strip()
+                # Handle both <= and < for upper bound
+                if "<=" in upper_part:
+                    upper = upper_part.replace("<=", "").strip()
+                    case_parts.append(f"WHEN {source} >= {lower} AND {source} <= {upper} THEN '{label}'")
+                else:
+                    upper = upper_part.replace("<", "").strip()
+                    case_parts.append(f"WHEN {source} >= {lower} AND {source} < {upper} THEN '{label}'")
             elif condition.startswith(">="):
                 value = condition[2:].strip()
                 case_parts.append(f"WHEN {source} >= {value} THEN '{label}'")
