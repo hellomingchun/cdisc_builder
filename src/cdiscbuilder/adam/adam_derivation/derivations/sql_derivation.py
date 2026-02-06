@@ -429,6 +429,13 @@ class SQLDerivation(BaseDerivation):
                 # Calculate distance to target date
                 if target_col in subject_data.columns and date_col in subject_data.columns:
                     # Get target date (should be same for all rows of this subject)
+                    target_date = subject_data[target_col][0]
+                    
+                    # Skip if target date is null
+                    if target_date is None:
+                        result_list.append(subject_data[source_col][0])
+                        continue
+                    
                     # Calculate date differences and find closest
                     # Handle multiple formats: "YYYY-MM-DD HH:MM:SS", "YYYY-MM-DDTHH:MM:SS" (ISO), or "YYYY-MM-DD"
                     # We convert everything to Datetime for precision comparison (ms level)
