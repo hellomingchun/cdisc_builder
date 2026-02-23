@@ -5,6 +5,8 @@ This module provides functionality to load and parse ODM XML files
 containing clinical trial data from OpenClinica.
 """
 
+from __future__ import annotations
+
 import re
 import xml.etree.ElementTree as ET
 from pathlib import Path

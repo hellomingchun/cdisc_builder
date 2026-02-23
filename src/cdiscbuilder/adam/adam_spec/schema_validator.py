@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import re
 from dataclasses import dataclass
@@ -385,7 +387,7 @@ class SchemaValidator:
             )
 
         # Numeric validations
-        if isinstance(value, int | float):
+        if isinstance(value, (int, float)):
             if "min" in schema and value < schema["min"]:
                 self.results.append(
                     ValidationResult(

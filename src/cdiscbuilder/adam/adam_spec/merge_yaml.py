@@ -1,12 +1,12 @@
 from copy import deepcopy
 from pathlib import Path
-from typing import Any
+from typing import Any, Union
 
 import yaml
 
 
 def merge_yaml(
-    paths: list[str | Path],
+    paths: list[Union[str, Path]],
     list_merge_strategy: str = "replace",
     list_merge_keys: dict[str, str] = None,  # pyre-ignore[9]
 ) -> dict[str, Any]:

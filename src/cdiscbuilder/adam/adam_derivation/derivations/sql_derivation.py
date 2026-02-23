@@ -1,5 +1,7 @@
 """SQL-based derivation handling most CDISC patterns."""
 
+from __future__ import annotations
+
 import logging
 from typing import Any
 
