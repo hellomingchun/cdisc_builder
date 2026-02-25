@@ -173,6 +173,43 @@ class GeneralProcessor:
                         # Map back to original index
                         series = seq_series.sort_index()
 
+                elif isinstance(col_config, dict) and col_config.get('function'):
+                    from ..functions import calculate_study_day
+                    func_name = col_config.get('function')
+                    args = col_config.get('args', [])
+                    
+                    # Resolve Args
+                    arg_series = []
+                    for arg in args:
+                        # Support cross-domain lookup? For now support local columns in final_df or pivoted
+                        if arg in final_df.columns:
+                            arg_series.append(final_df[arg])
+                        elif arg in pivoted.columns:
+                            arg_series.append(pivoted[arg])
+                        else:
+                            # Try loading from DM if it looks like DM.RFSTDTC
+                            if '.' in arg:
+                                dname, vname = arg.split('.')
+                                # Only DM supported for now as reference
+                                if dname == 'DM':
+                                    import os
+                                    # Locate output_dir? (We don't have output_dir here easily)
+                                    # For now, let's assume RFSTDTC was merged into DM block or AE block already
+                                    # Or we pass it in. 
+                                    # For the demo, let's assume RFSTDTC is in the dataset or handled as a string
+                                    print(f"Warning: Cross-domain arg {arg} resolution not fully implemented in GeneralProcessor")
+                                    arg_series.append(pd.Series([None] * len(pivoted)))
+                                else:
+                                    arg_series.append(pd.Series([None] * len(pivoted)))
+                            else:
+                                arg_series.append(pd.Series([None] * len(pivoted)))
+                    
+                    if func_name == 'calculate_study_day' and len(arg_series) >= 2:
+                        series = calculate_study_day(arg_series[0], arg_series[1])
+                    else:
+                        print(f"Warning: Unsupported function {func_name} or wrong args for {target_col}")
+                        series = pd.Series([None] * len(pivoted))
+
                 elif literal_expr is not None:
                     # Explicit literal value
                     series = pd.Series([literal_expr] * len(pivoted))

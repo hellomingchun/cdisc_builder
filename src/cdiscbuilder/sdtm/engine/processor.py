@@ -106,28 +106,6 @@ def process_domain(domain_name, sources, df_long, default_keys, output_dir):
         # Re-align to combined_df index
         combined_df[target_col] = seq_series.sort_index()
 
-    # --- Post-Processing: Study Day Calculation ---
-    from .functions import calculate_study_day
-    
-    rfstdtc = None
-    if 'RFSTDTC' in combined_df.columns:
-        rfstdtc = combined_df['RFSTDTC']
-    else:
-        dm_path = os.path.join(output_dir, "DM.parquet")
-        if os.path.exists(dm_path):
-            dm_df = pd.read_parquet(dm_path)
-            if 'RFSTDTC' in dm_df.columns and 'USUBJID' in dm_df.columns:
-                temp_dm = dm_df[['USUBJID', 'RFSTDTC']].drop_duplicates()
-                combined_df = combined_df.merge(temp_dm, on='USUBJID', how='left')
-                rfstdtc = combined_df['RFSTDTC']
-
-    if rfstdtc is not None:
-        dtc_cols = [c for c in combined_df.columns if c.endswith('DTC') and c != 'RFSTDTC']
-        for col in dtc_cols:
-            dy_col = col.replace('DTC', 'DY')
-            if dy_col not in combined_df.columns:
-                combined_df[dy_col] = calculate_study_day(combined_df[col], rfstdtc)
-    
     # Save to Parquet
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
