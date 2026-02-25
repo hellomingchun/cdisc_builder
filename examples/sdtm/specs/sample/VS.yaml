@@ -1,0 +1,12 @@
+VS:
+  - type: findings
+    formoid: "F_VS_1"
+    item_oid_regex: "I_VS_.*"
+    columns:
+      STUDYID: {source: "StudyOID", type: "str", label: "Study Identifier"}
+      DOMAIN: {literal: "VS", type: "str", label: "Domain Abbreviation"}
+      USUBJID: {source: "SubjectKey", type: "str", label: "Unique Subject Identifier"}
+      VSTESTCD: {source: "ItemOID", type: "str", label: "Test Code"}
+      VSORRES: {source: "Value", type: "str", label: "Result"}
+      VSDTC: {source: "StudyEventStartDate", type: "date", label: "Date"}
+      VSSEQ: {group: ["USUBJID"], sort_by: ["VSDTC"], type: "int", label: "Sequence"}

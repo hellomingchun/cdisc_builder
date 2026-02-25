@@ -1,0 +1,29 @@
+IE:
+  - type: special_purpose
+    formoid: "F_ELIGIBILITY"
+    columns:
+      STUDYID:
+        source: "StudyOID"
+        type: "str"
+        label: "Study Identifier"
+      DOMAIN:
+        literal: "IE"
+        type: "str"
+        label: "Domain Abbreviation"
+      USUBJID:
+        source: "SubjectKey"
+        prefix: "CART-"
+        type: "str"
+        label: "Unique Subject Identifier"
+      IESEQ:
+        group: ["USUBJID"]
+        type: "int"
+        label: "Sequence Number"
+      IETESTCD:
+        source: "ItemOID"
+        type: "str"
+        label: "Inclusion/Exclusion Criterion Short Name"
+      IEORRES:
+        source: "Value"
+        type: "str"
+        label: "I/E Criterion Original Result"

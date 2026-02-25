@@ -1,0 +1,89 @@
+# SDTM Demographics (DM) Specification
+# Class: Special Purpose
+DM:
+  - type: special_purpose
+    formoid: "F_1DEMOGRAPHIC"
+    columns:
+      STUDYID: 
+        source: "StudyOID"
+        type: "str"
+        label: "Study Identifier"
+      DOMAIN: 
+        literal: "DM"
+        type: "str"
+        label: "Domain Abbreviation"
+      USUBJID: 
+        source: "SubjectKey"
+        prefix: "CART-"
+        type: "str"
+        label: "Unique Subject Identifier"
+      SUBJID: 
+        source: "SubjectKey"
+        type: "str"
+        label: "Subject Identifier"
+      RFSTDTC: 
+        source: "I_1DEMO_TODAY"
+        type: "date"
+        label: "Subject Reference Start Date"
+      SEX: 
+        source: "I_1DEMO_PTSEXEL"
+        type: "str"
+        label: "Sex"
+        value_mapping:
+          "Male": "M"
+          "Female": "F"
+      RACE: 
+        source: "I_1DEMO_PTRACE"
+        type: "str"
+        label: "Race"
+      ETHNIC: 
+        source: "I_1DEMO_HISP"
+        type: "str"
+        label: "Ethnicity"
+        value_mapping:
+          "Yes": "HISPANIC OR LATINO"
+          "No": "NOT HISPANIC OR LATINO"
+      ARM: 
+        literal: "CAR-T Therapy"
+        type: "str"
+        label: "Description of Planned Arm"
+      COUNTRY: 
+        literal: "USA"
+        type: "str"
+        label: "Country"
+      DMDTC: 
+        source: "I_1DEMO_TODAY"
+        type: "date"
+        label: "Date of Collection"
+
+  - type: special_purpose
+    formoid: "F_ELIGIBILITY"
+    merge_on: ["USUBJID"]
+    columns:
+      USUBJID: 
+        source: "SubjectKey"
+        prefix: "CART-"
+        type: "str"
+        label: "Unique Subject Identifier"
+      AGE: 
+        source: "I_ELIGI_PTAGE"
+        type: "int"
+        label: "Age"
+      AGEU: 
+        literal: "YEARS"
+        type: "str"
+        label: "Age Units"
+
+  - type: special_purpose
+    formoid: "F_DISPOSITION"
+    merge_on: ["USUBJID"]
+    columns:
+      USUBJID: 
+        source: "SubjectKey"
+        prefix: "CART-"
+        type: "str"
+        label: "Unique Subject Identifier"
+      RFENDTC:
+        source: "I_DISPO_DS_DSSTDAT"
+        type: "date"
+        label: "Subject Reference End Date"

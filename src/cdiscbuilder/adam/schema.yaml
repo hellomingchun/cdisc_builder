@@ -50,7 +50,7 @@ schemas:
       type: dict
       required: [formoid, columns]
       properties:
-        type: {type: str, enum: ["general", "finding"]}
+        type: {type: str, enum: ["general", "findings"]}
         item_group_regex: {type: str}
         item_oid_regex: {type: str}
         formoid: {type: [str, list]}

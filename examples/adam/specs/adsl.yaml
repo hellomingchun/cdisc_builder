@@ -1,36 +1,30 @@
 domain: ADSL
-key: 
-  - USUBJID
 dir:
   sdtm: ../../sdtm
   adam: ..
+key: [USUBJID]
 columns:
   - name: STUDYID
-    type: text
-    derivation:
-      source: DM.STUDYID
+    type: str
+    label: "Study Identifier"
+    derivation: {source: DM.STUDYID}
   - name: USUBJID
-    type: text
-    derivation:
-      source: DM.USUBJID
+    type: str
+    label: "Unique Subject Identifier"
+    derivation: {source: DM.USUBJID}
+  - name: TRTP
+    type: str
+    label: "Planned Treatment for Period 01"
+    derivation: {source: DM.ARM}
   - name: AGE
-    type: integer
-    derivation:
-      source: DM.AGE
-      type: integer
+    type: int
+    label: "Age"
+    derivation: {source: DM.AGE}
   - name: SEX
-    type: text
-    derivation:
-      source: DM.SEX
+    type: str
+    label: "Sex"
+    derivation: {source: DM.SEX}
   - name: SAFFL
-    type: text
-    derivation:
-      constant: Y
-  - name: TRT01P
-    type: text
-    derivation:
-      source: DM.ARM
-  - name: RFSTDTC
-    type: text
-    derivation:
-      source: DM.RFSTDTC
+    type: str
+    label: "Safety Population Flag"
+    derivation: {constant: "'Y'"}

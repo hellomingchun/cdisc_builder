@@ -1,0 +1,30 @@
+CM:
+  - type: interventions
+    formoid: "F_CONMED"
+    columns:
+      STUDYID:
+        source: "StudyOID"
+        type: "str"
+        label: "Study Identifier"
+      DOMAIN:
+        literal: "CM"
+        type: "str"
+        label: "Domain Abbreviation"
+      USUBJID:
+        source: "SubjectKey"
+        prefix: "CART-"
+        type: "str"
+        label: "Unique Subject Identifier"
+      CMSEQ:
+        group: ["USUBJID"]
+        sort_by: ["CMSTDTC"]
+        type: "int"
+        label: "Sequence Number"
+      CMTRT:
+        source: "I_CONME_CMTRT"
+        type: "str"
+        label: "Reported Name of Drug, Med, or Therapy"
+      CMSTDTC:
+        source: "I_CONME_CMSTDTC"
+        type: "date"
+        label: "Start Date/Time of Medication"

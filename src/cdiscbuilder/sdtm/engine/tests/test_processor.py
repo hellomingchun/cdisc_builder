@@ -39,15 +39,15 @@ def test_process_domain_general_empty_dfs(mock_gp, capsys):
     out, err = capsys.readouterr()
     assert "Warning: No data found for domain DM" in out
 
-@patch('cdiscbuilder.sdtm.engine.classes.finding.FindingProcessor')
+@patch('cdiscbuilder.sdtm.engine.processor.FindingsProcessor')
 @patch('cdiscbuilder.sdtm.engine.processor.GeneralProcessor')
-def test_process_domain_finding_processor(mock_gp, mock_fp, tmp_path):
+def test_process_domain_findings_processor(mock_gp, mock_fp, tmp_path):
     mock_inst = MagicMock()
     mock_inst.process.return_value = [pd.DataFrame({'A': [1]})]
     mock_fp.return_value = mock_inst
     
     with patch('pandas.DataFrame.to_parquet') as mock_to_parquet:
-        sources = [{'type': 'finding', 'formoid': 'F1'}]
+        sources = [{'type': 'findings', 'formoid': 'F1'}]
         process_domain('VS', sources, pd.DataFrame(), ['Subj'], str(tmp_path))
         mock_fp.assert_called_once()
         mock_gp.assert_not_called()

@@ -1,0 +1,25 @@
+SV:
+  - type: special_purpose
+    formoid: "F_SOURCEDOCUME"
+    columns:
+      STUDYID:
+        source: "StudyOID"
+        type: "str"
+        label: "Study Identifier"
+      DOMAIN:
+        literal: "SV"
+        type: "str"
+        label: "Domain Abbreviation"
+      USUBJID:
+        source: "SubjectKey"
+        prefix: "CART-"
+        type: "str"
+        label: "Unique Subject Identifier"
+      VISIT:
+        source: "StudyEventOID"
+        type: "str"
+        label: "Visit Name"
+      SVSTDTC:
+        source: "StudyEventStartDate"
+        type: "date"
+        label: "Start Date/Time of Visit"

@@ -22,7 +22,7 @@ def validate_domain_config(domain_name, config, schema):
 
     # Check if General (List) or Findings (Dict)
     is_general = isinstance(config, list)
-    is_findings = isinstance(config, dict) and config.get('type') == 'FINDINGS'
+    is_findings = isinstance(config, dict) and str(config.get('type')).upper() == 'FINDINGS'
 
     if is_general:
         return _validate_general(domain_name, config, schema['schemas']['general_domain'], schema['definitions'])

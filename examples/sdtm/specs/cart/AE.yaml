@@ -1,0 +1,38 @@
+AE:
+  - type: events
+    formoid: "F_ADVERSEEVENT"
+    columns:
+      STUDYID:
+        source: "StudyOID"
+        type: "str"
+        label: "Study Identifier"
+      DOMAIN:
+        literal: "AE"
+        type: "str"
+        label: "Domain Abbreviation"
+      USUBJID:
+        source: "SubjectKey"
+        prefix: "CART-"
+        type: "str"
+        label: "Unique Subject Identifier"
+      AETERM:
+        source: "I_ADVER_AETERM"
+        type: "str"
+        label: "Reported Term for the Adverse Event"
+      AESEV:
+        source: "I_ADVER_AESEV"
+        type: "str"
+        label: "Severity/Intensity"
+      AESTDTC:
+        source: "I_ADVER_AESTDAT"
+        type: "date"
+        label: "Start Date/Time of Adverse Event"
+      AEENDTC:
+        source: "I_ADVER_AEENDDAT"
+        type: "date"
+        label: "End Date/Time of Adverse Event"
+      AESEQ:
+        group: ["USUBJID"]
+        sort_by: ["AESTDTC"]
+        type: "int"
+        label: "Sequence Number"

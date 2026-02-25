@@ -1,12 +1,14 @@
 import pandas as pd
 import os
+
 from .classes.general import GeneralProcessor
+from .classes.interventions import InterventionsProcessor
+from .classes.events import EventsProcessor
+from .classes.findings import FindingsProcessor
+from .classes.special_purpose import SpecialPurposeProcessor
 
 
 def process_domain(domain_name, sources, df_long, default_keys, output_dir):
-    # Determine type of the first block (assumes all blocks in a domain are same type)
-    # process_domain receives 'sources' which is settings_entry.
-    
     # Normalize to list
     if isinstance(sources, dict):
         sources = [sources]
@@ -15,13 +17,17 @@ def process_domain(domain_name, sources, df_long, default_keys, output_dir):
         print(f"Warning: No configuration found for {domain_name}")
         return
 
-    from .classes.finding import FindingProcessor
-
     # Check type of first source to decide processor
-    p_type = sources[0].get('type', 'general') if sources else 'general'
+    p_type = sources[0].get('type', 'general').lower() if sources else 'general'
 
-    if p_type == 'finding':
-        processor = FindingProcessor()
+    if p_type == 'interventions':
+        processor = InterventionsProcessor()
+    elif p_type == 'events':
+        processor = EventsProcessor()
+    elif p_type == 'findings':
+        processor = FindingsProcessor()
+    elif p_type == 'special_purpose':
+        processor = SpecialPurposeProcessor()
     else:
         processor = GeneralProcessor()
 
@@ -49,18 +55,9 @@ def process_domain(domain_name, sources, df_long, default_keys, output_dir):
                  print(f"Warning: Cannot merge block {i} on {merge_on}, missing keys: {missing_keys}. Appending instead.")
                  combined_df = pd.concat([combined_df, current_df], ignore_index=True)
              else:
-                 # Perform merge (left merge to keep base subjects, or outer?)
-                 # Usually detailed info (Age) is added to base (Demog), so Left Merge is safer?
-                 # Or Outer to include subjects only in Eligibility? CDISC implies DM comes from Demog.
-                 # Let's use left join by default to preserve base population.
-                 # Actually, if creating DM, we usually want all subjects.
-                 # But if block 2 is just attributes, 'left' on block 1 is typical.
-                 # Let's use 'left' but print info.
                  print(f"Merging block on {merge_on}")
                  combined_df = combined_df.merge(current_df, on=merge_on, how='left', suffixes=('', '_y'))
                  
-                 # Drop duplicate columns ending in _y if they are not meaningful (or keep them?)
-                 # Usually we don't want collisions.
                  cols_to_drop = [c for c in combined_df.columns if c.endswith('_y')]
                  if cols_to_drop:
                      combined_df.drop(columns=cols_to_drop, inplace=True)
@@ -75,7 +72,6 @@ def process_domain(domain_name, sources, df_long, default_keys, output_dir):
         mappings = source.get('columns', {})
         for col_name, col_cfg in mappings.items():
             if isinstance(col_cfg, dict) and col_cfg.get('group'):
-                # Store config. Overwrite if duplicate (assumes consistent config across blocks for same col)
                 seq_configs[col_name] = col_cfg
 
     for target_col, col_config in seq_configs.items():
@@ -109,6 +105,28 @@ def process_domain(domain_name, sources, df_long, default_keys, output_dir):
         seq_series = temp_df.groupby(group_cols).cumcount() + 1
         # Re-align to combined_df index
         combined_df[target_col] = seq_series.sort_index()
+
+    # --- Post-Processing: Study Day Calculation ---
+    from .functions import calculate_study_day
+    
+    rfstdtc = None
+    if 'RFSTDTC' in combined_df.columns:
+        rfstdtc = combined_df['RFSTDTC']
+    else:
+        dm_path = os.path.join(output_dir, "DM.parquet")
+        if os.path.exists(dm_path):
+            dm_df = pd.read_parquet(dm_path)
+            if 'RFSTDTC' in dm_df.columns and 'USUBJID' in dm_df.columns:
+                temp_dm = dm_df[['USUBJID', 'RFSTDTC']].drop_duplicates()
+                combined_df = combined_df.merge(temp_dm, on='USUBJID', how='left')
+                rfstdtc = combined_df['RFSTDTC']
+
+    if rfstdtc is not None:
+        dtc_cols = [c for c in combined_df.columns if c.endswith('DTC') and c != 'RFSTDTC']
+        for col in dtc_cols:
+            dy_col = col.replace('DTC', 'DY')
+            if dy_col not in combined_df.columns:
+                combined_df[dy_col] = calculate_study_day(combined_df[col], rfstdtc)
     
     # Save to Parquet
     if not os.path.exists(output_dir):

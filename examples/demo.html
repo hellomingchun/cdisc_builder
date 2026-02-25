@@ -1,0 +1,529 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CDISC SDTM & ADaM Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; padding: 20px; }
+        .card { margin-bottom: 20px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .nav-tabs { margin-bottom: 20px; }
+        .table { font-size: 0.85rem; }
+        .header { background: #004a99; color: white; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+        table th, table td { text-align: center; vertical-align: middle; }
+    </style>
+</head>
+<body>
+    <div class="header text-center">
+        <h1>CDISC Builder: SDTM & ADaM Showcase</h1>
+        <p>Demonstrating automated CDISC dataset generation from OpenClinica ODM XML</p>
+    </div>
+
+    <ul class="nav nav-tabs" id="demoTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="sdtm-tab" data-bs-toggle="tab" data-bs-target="#sdtm" type="button" role="tab">SDTM Domains</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="adam-tab" data-bs-toggle="tab" data-bs-target="#adam" type="button" role="tab">ADaM Datasets</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="demoTabsContent">
+        <!-- SDTM Tab -->
+        <div class="tab-pane fade show active" id="sdtm" role="tabpanel">
+            <div class="card">
+                <div class="card-header bg-primary text-white">DM - Demographics</div>
+                <div class="card-body">
+                    <table border="1" class="dataframe table table-hover">
+  <thead>
+    <tr style="text-align: right;">
+      <th>STUDYID</th>
+      <th>DOMAIN</th>
+      <th>USUBJID</th>
+      <th>RFSTDTC</th>
+      <th>AGE</th>
+      <th>SEX</th>
+      <th>RACE</th>
+      <th>ARM</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>DM</td>
+      <td>SS_001</td>
+      <td>2026-01-01</td>
+      <td>21</td>
+      <td>F</td>
+      <td>White</td>
+      <td>Placebo</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>DM</td>
+      <td>SS_002</td>
+      <td>2026-01-01</td>
+      <td>22</td>
+      <td>M</td>
+      <td>White</td>
+      <td>Placebo</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>DM</td>
+      <td>SS_003</td>
+      <td>2026-01-01</td>
+      <td>23</td>
+      <td>F</td>
+      <td>White</td>
+      <td>Placebo</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>DM</td>
+      <td>SS_004</td>
+      <td>2026-01-01</td>
+      <td>24</td>
+      <td>M</td>
+      <td>White</td>
+      <td>Placebo</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>DM</td>
+      <td>SS_005</td>
+      <td>2026-01-01</td>
+      <td>25</td>
+      <td>F</td>
+      <td>White</td>
+      <td>Placebo</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>DM</td>
+      <td>SS_006</td>
+      <td>2026-01-01</td>
+      <td>26</td>
+      <td>M</td>
+      <td>White</td>
+      <td>Placebo</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>DM</td>
+      <td>SS_007</td>
+      <td>2026-01-01</td>
+      <td>27</td>
+      <td>F</td>
+      <td>White</td>
+      <td>Placebo</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>DM</td>
+      <td>SS_008</td>
+      <td>2026-01-01</td>
+      <td>28</td>
+      <td>M</td>
+      <td>White</td>
+      <td>Placebo</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>DM</td>
+      <td>SS_009</td>
+      <td>2026-01-01</td>
+      <td>29</td>
+      <td>F</td>
+      <td>White</td>
+      <td>Placebo</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>DM</td>
+      <td>SS_010</td>
+      <td>2026-01-01</td>
+      <td>30</td>
+      <td>M</td>
+      <td>White</td>
+      <td>Placebo</td>
+    </tr>
+  </tbody>
+</table>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header bg-primary text-white">AE - Adverse Events</div>
+                <div class="card-body">
+                    <table border="1" class="dataframe table table-hover">
+  <thead>
+    <tr style="text-align: right;">
+      <th>STUDYID</th>
+      <th>DOMAIN</th>
+      <th>USUBJID</th>
+      <th>AETERM</th>
+      <th>AESEV</th>
+      <th>AESTDTC</th>
+      <th>AESEQ</th>
+      <th>RFSTDTC</th>
+      <th>AESTDY</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>AE</td>
+      <td>SS_001</td>
+      <td>Headache</td>
+      <td>Mild</td>
+      <td>2026-01-15</td>
+      <td>1</td>
+      <td>2026-01-01</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>AE</td>
+      <td>SS_002</td>
+      <td>Headache</td>
+      <td>Mild</td>
+      <td>2026-01-15</td>
+      <td>1</td>
+      <td>2026-01-01</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>AE</td>
+      <td>SS_003</td>
+      <td>Headache</td>
+      <td>Mild</td>
+      <td>2026-01-15</td>
+      <td>1</td>
+      <td>2026-01-01</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>AE</td>
+      <td>SS_004</td>
+      <td>Headache</td>
+      <td>Mild</td>
+      <td>2026-01-15</td>
+      <td>1</td>
+      <td>2026-01-01</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>AE</td>
+      <td>SS_005</td>
+      <td>Headache</td>
+      <td>Mild</td>
+      <td>2026-01-15</td>
+      <td>1</td>
+      <td>2026-01-01</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>AE</td>
+      <td>SS_006</td>
+      <td>Headache</td>
+      <td>Mild</td>
+      <td>2026-01-15</td>
+      <td>1</td>
+      <td>2026-01-01</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>AE</td>
+      <td>SS_007</td>
+      <td>Headache</td>
+      <td>Mild</td>
+      <td>2026-01-15</td>
+      <td>1</td>
+      <td>2026-01-01</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>AE</td>
+      <td>SS_008</td>
+      <td>Headache</td>
+      <td>Mild</td>
+      <td>2026-01-15</td>
+      <td>1</td>
+      <td>2026-01-01</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>AE</td>
+      <td>SS_009</td>
+      <td>Headache</td>
+      <td>Mild</td>
+      <td>2026-01-15</td>
+      <td>1</td>
+      <td>2026-01-01</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>AE</td>
+      <td>SS_010</td>
+      <td>Headache</td>
+      <td>Mild</td>
+      <td>2026-01-15</td>
+      <td>1</td>
+      <td>2026-01-01</td>
+      <td>15</td>
+    </tr>
+  </tbody>
+</table>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header bg-primary text-white">VS - Vital Signs (First 10 rows)</div>
+                <div class="card-body">
+                    <table border="1" class="dataframe table table-hover">
+  <thead>
+    <tr style="text-align: right;">
+      <th>STUDYID</th>
+      <th>DOMAIN</th>
+      <th>USUBJID</th>
+      <th>VSTESTCD</th>
+      <th>VSORRES</th>
+      <th>VSDTC</th>
+      <th>VSSEQ</th>
+      <th>RFSTDTC</th>
+      <th>VSDY</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>VS</td>
+      <td>SS_001</td>
+      <td>I_VS_HEIGHT</td>
+      <td>161</td>
+      <td>2026-01-01</td>
+      <td>1</td>
+      <td>2026-01-01</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>VS</td>
+      <td>SS_001</td>
+      <td>I_VS_WEIGHT</td>
+      <td>61</td>
+      <td>2026-01-01</td>
+      <td>2</td>
+      <td>2026-01-01</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>VS</td>
+      <td>SS_001</td>
+      <td>I_VS_SYSBP</td>
+      <td>121</td>
+      <td>2026-01-01</td>
+      <td>3</td>
+      <td>2026-01-01</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>VS</td>
+      <td>SS_001</td>
+      <td>I_VS_DIABP</td>
+      <td>81</td>
+      <td>2026-01-01</td>
+      <td>4</td>
+      <td>2026-01-01</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>VS</td>
+      <td>SS_001</td>
+      <td>I_VS_WEIGHT</td>
+      <td>62</td>
+      <td>2026-02-01</td>
+      <td>5</td>
+      <td>2026-01-01</td>
+      <td>32</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>VS</td>
+      <td>SS_001</td>
+      <td>I_VS_SYSBP</td>
+      <td>123</td>
+      <td>2026-02-01</td>
+      <td>6</td>
+      <td>2026-01-01</td>
+      <td>32</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>VS</td>
+      <td>SS_001</td>
+      <td>I_VS_DIABP</td>
+      <td>82</td>
+      <td>2026-02-01</td>
+      <td>7</td>
+      <td>2026-01-01</td>
+      <td>32</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>VS</td>
+      <td>SS_002</td>
+      <td>I_VS_HEIGHT</td>
+      <td>162</td>
+      <td>2026-01-01</td>
+      <td>1</td>
+      <td>2026-01-01</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>VS</td>
+      <td>SS_002</td>
+      <td>I_VS_WEIGHT</td>
+      <td>62</td>
+      <td>2026-01-01</td>
+      <td>2</td>
+      <td>2026-01-01</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>S_DEMO_001</td>
+      <td>VS</td>
+      <td>SS_002</td>
+      <td>I_VS_SYSBP</td>
+      <td>122</td>
+      <td>2026-01-01</td>
+      <td>3</td>
+      <td>2026-01-01</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADaM Tab -->
+        <div class="tab-pane fade" id="adam" role="tabpanel">
+            <div class="card">
+                <div class="card-header bg-success text-white">ADSL - Subject Level Analysis</div>
+                <div class="card-body">
+                    <table border="1" class="dataframe table table-hover">
+  <thead>
+    <tr style="text-align: right;">
+      <th>USUBJID</th>
+      <th>STUDYID</th>
+      <th>TRTP</th>
+      <th>AGE</th>
+      <th>SEX</th>
+      <th>SAFFL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>SS_001</td>
+      <td>S_DEMO_001</td>
+      <td>Placebo</td>
+      <td>21</td>
+      <td>F</td>
+      <td>'Y'</td>
+    </tr>
+    <tr>
+      <td>SS_002</td>
+      <td>S_DEMO_001</td>
+      <td>Placebo</td>
+      <td>22</td>
+      <td>M</td>
+      <td>'Y'</td>
+    </tr>
+    <tr>
+      <td>SS_003</td>
+      <td>S_DEMO_001</td>
+      <td>Placebo</td>
+      <td>23</td>
+      <td>F</td>
+      <td>'Y'</td>
+    </tr>
+    <tr>
+      <td>SS_004</td>
+      <td>S_DEMO_001</td>
+      <td>Placebo</td>
+      <td>24</td>
+      <td>M</td>
+      <td>'Y'</td>
+    </tr>
+    <tr>
+      <td>SS_005</td>
+      <td>S_DEMO_001</td>
+      <td>Placebo</td>
+      <td>25</td>
+      <td>F</td>
+      <td>'Y'</td>
+    </tr>
+    <tr>
+      <td>SS_006</td>
+      <td>S_DEMO_001</td>
+      <td>Placebo</td>
+      <td>26</td>
+      <td>M</td>
+      <td>'Y'</td>
+    </tr>
+    <tr>
+      <td>SS_007</td>
+      <td>S_DEMO_001</td>
+      <td>Placebo</td>
+      <td>27</td>
+      <td>F</td>
+      <td>'Y'</td>
+    </tr>
+    <tr>
+      <td>SS_008</td>
+      <td>S_DEMO_001</td>
+      <td>Placebo</td>
+      <td>28</td>
+      <td>M</td>
+      <td>'Y'</td>
+    </tr>
+    <tr>
+      <td>SS_009</td>
+      <td>S_DEMO_001</td>
+      <td>Placebo</td>
+      <td>29</td>
+      <td>F</td>
+      <td>'Y'</td>
+    </tr>
+    <tr>
+      <td>SS_010</td>
+      <td>S_DEMO_001</td>
+      <td>Placebo</td>
+      <td>30</td>
+      <td>M</td>
+      <td>'Y'</td>
+    </tr>
+  </tbody>
+</table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

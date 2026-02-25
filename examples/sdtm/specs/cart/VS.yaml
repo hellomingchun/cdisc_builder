@@ -1,0 +1,40 @@
+VS:
+  - type: findings
+    formoid: "F_KITCHENSINK"
+    item_oid_regex: "I_KITCH_(HEIGHT|WEIGHT|BP_SYS|BP_DIA|PULSE).*"
+    columns:
+      STUDYID:
+        source: "StudyOID"
+        type: "str"
+        label: "Study Identifier"
+      DOMAIN:
+        literal: "VS"
+        type: "str"
+        label: "Domain Abbreviation"
+      USUBJID:
+        source: "SubjectKey"
+        prefix: "CART-"
+        type: "str"
+        label: "Unique Subject Identifier"
+      VSTESTCD:
+        source: "ItemOID"
+        regex_extract: "I_KITCH_(.*)"
+        type: "str"
+        label: "Vital Signs Test Short Name"
+      VSTEST:
+        source: "ItemName"
+        type: "str"
+        label: "Vital Signs Test Name"
+      VSORRES:
+        source: "Value"
+        type: "str"
+        label: "Result or Finding in Original Units"
+      VSDTC:
+        source: "StudyEventStartDate"
+        type: "date"
+        label: "Date/Time of Measurements"
+      VSSEQ:
+        group: ["USUBJID"]
+        sort_by: ["VSDTC", "VSTESTCD"]
+        type: "int"
+        label: "Sequence Number"

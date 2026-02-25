@@ -1,0 +1,11 @@
+AE:
+  - type: events
+    formoid: "F_AE_1"
+    columns:
+      STUDYID: {source: "StudyOID", type: "str", label: "Study Identifier"}
+      DOMAIN: {literal: "AE", type: "str", label: "Domain Abbreviation"}
+      USUBJID: {source: "SubjectKey", type: "str", label: "Unique Subject Identifier"}
+      AETERM: {source: "I_AE_TERM", type: "str", label: "Reported Term"}
+      AESEV: {source: "I_AE_SEVERITY", type: "str", label: "Severity"}
+      AESTDTC: {source: "I_AE_STARTDATE", type: "date", label: "Start Date"}
+      AESEQ: {group: ["USUBJID"], sort_by: ["AESTDTC"], type: "int", label: "Sequence"}

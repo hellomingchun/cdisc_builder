@@ -15,8 +15,14 @@ def create_sdtm_datasets(config_input, input_csv, output_dir):
     print(f"Loading data from {input_csv}...")
     df_long = pd.read_csv(input_csv)
 
-    for domain, settings_entry in config['domains'].items():
+    # Prioritize DM domain processing
+    domains = list(config['domains'].keys())
+    if 'DM' in domains:
+        domains.remove('DM')
+        domains.insert(0, 'DM')
 
+    for domain in domains:
+        settings_entry = config['domains'][domain]
         print(f"Processing domain: {domain}")
         
         # Normalize to list.

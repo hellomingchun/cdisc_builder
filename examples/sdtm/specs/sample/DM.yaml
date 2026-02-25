@@ -1,0 +1,12 @@
+DM:
+  - type: special_purpose
+    formoid: "F_DEMOG_1"
+    columns:
+      STUDYID: {source: "StudyOID", type: "str", label: "Study Identifier"}
+      DOMAIN: {literal: "DM", type: "str", label: "Domain Abbreviation"}
+      USUBJID: {source: "SubjectKey", type: "str", label: "Unique Subject Identifier"}
+      RFSTDTC: {literal: "2026-01-01", type: "date", label: "Subject Reference Start Date"}
+      AGE: {source: "I_DEMOG_AGE", type: "int", label: "Age"}
+      SEX: {source: "I_DEMOG_SEX", type: "str", label: "Sex"}
+      RACE: {source: "I_DEMOG_RACE", type: "str", label: "Race"}
+      ARM: {literal: "Placebo", type: "str", label: "Description of Planned Arm"}
