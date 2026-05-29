@@ -1,4 +1,4 @@
-__version__ = "0.2.2"
+__version__ = "1.2.0"
 
 from . import adam as adam
 from . import tlf as tlf
