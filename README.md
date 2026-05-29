@@ -148,6 +148,34 @@ RESP:
   case_sensitive: false
 ```
 
+## Development
+
+This project uses modern tools for testing and maintaining code quality:
+
+### 1. Running Tests
+Run the automated test suite using `pytest`:
+```bash
+# Using standard pip/virtual environment
+pytest
+
+# Using uv
+uv run pytest
+```
+
+### 2. Code Quality
+We use `black` for code formatting, `ruff` for linting, and `mypy` for type checking:
+
+```bash
+# Code Formatting (in-place rewrite)
+uv run --with black black src/
+
+# Linting and style checks
+uv run --with ruff ruff check src/
+
+# Type Checking
+uv run --with mypy mypy src/
+```
+
 ## License
 
 [MIT License](LICENSE)
