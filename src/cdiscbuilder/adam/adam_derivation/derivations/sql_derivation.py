@@ -38,16 +38,28 @@ class SQLDerivation(BaseDerivation):
 
         # Post-processing: Value Mapping
         # Support both inside derivation (legacy) and outside (col_spec)
-        value_mapping = self.col_spec.get("value_mapping") or derivation.get("value_mapping") or self.col_spec.get("mapping_value") or derivation.get("mapping_value")
-        mapping_default = self.col_spec.get("mapping_default") or derivation.get("mapping_default")
-        
+        value_mapping = (
+            self.col_spec.get("value_mapping")
+            or derivation.get("value_mapping")
+            or self.col_spec.get("mapping_value")
+            or derivation.get("mapping_value")
+        )
+        mapping_default = self.col_spec.get("mapping_default") or derivation.get(
+            "mapping_default"
+        )
+
         # Check for case sensitivity setting (default is True)
         case_sensitive = self.col_spec.get("case_sensitive")
         if case_sensitive is None:
             case_sensitive = derivation.get("case_sensitive", True)
-        
+
         if value_mapping:
-             series = self._apply_mapping(series, value_mapping, default=mapping_default, case_sensitive=case_sensitive)
+            series = self._apply_mapping(
+                series,
+                value_mapping,
+                default=mapping_default,
+                case_sensitive=case_sensitive,
+            )
 
         # Post-processing: Cut (Categorization)
         if "cut" in derivation:
@@ -61,21 +73,21 @@ class SQLDerivation(BaseDerivation):
 
     def _apply_cut(self, series: pl.Series, cuts: dict[str, str]) -> pl.Series:
         """Apply cut logic to an existing series using temporary SQL context."""
-        
+
         # We perform the cut logic by creating a temporary DataFrame with the series
         # and running the SQL generation logic on it.
         temp_col = "_val"
-        
+
         # Cast to Float64 for numeric comparisons (handles string source data)
         try:
             numeric_series = series.cast(pl.Float64)
         except Exception:
             # If cast fails, try to keep as-is (maybe it's already numeric)
             numeric_series = series
-            
+
         temp_df = pl.DataFrame({temp_col: numeric_series})
         source = temp_col
-        
+
         # Build CASE expression (logic lifted from original _derive_cut)
         case_parts = []
         for condition, label in cuts.items():
@@ -88,11 +100,21 @@ class SQLDerivation(BaseDerivation):
             sql_condition = sql_condition.replace("=", "___EQ___")
 
             # Now replace back with source reference
-            sql_condition = sql_condition.replace("___GTE___", f">= {source} AND {source} >=")
-            sql_condition = sql_condition.replace("___LTE___", f"<= {source} AND {source} <=")
-            sql_condition = sql_condition.replace("___GT___", f"> {source} AND {source} >")
-            sql_condition = sql_condition.replace("___LT___", f"< {source} AND {source} <")
-            sql_condition = sql_condition.replace("___EQ___", f"= {source} AND {source} =")
+            sql_condition = sql_condition.replace(
+                "___GTE___", f">= {source} AND {source} >="
+            )
+            sql_condition = sql_condition.replace(
+                "___LTE___", f"<= {source} AND {source} <="
+            )
+            sql_condition = sql_condition.replace(
+                "___GT___", f"> {source} AND {source} >"
+            )
+            sql_condition = sql_condition.replace(
+                "___LT___", f"< {source} AND {source} <"
+            )
+            sql_condition = sql_condition.replace(
+                "___EQ___", f"= {source} AND {source} ="
+            )
 
             # Clean up the condition - handle all comparison operators
             if " and " in condition.lower():
@@ -100,7 +122,7 @@ class SQLDerivation(BaseDerivation):
                 parts = condition.lower().split(" and ")
                 lower_part = parts[0].strip()
                 upper_part = parts[1].strip()
-                
+
                 # Parse lower bound (>= or >)
                 if lower_part.startswith(">="):
                     lower_val = lower_part.replace(">=", "").strip()
@@ -112,7 +134,7 @@ class SQLDerivation(BaseDerivation):
                     # Fallback for unexpected format
                     case_parts.append(f"WHEN {condition} THEN '{label}'")
                     continue
-                
+
                 # Parse upper bound (<= or <)
                 if upper_part.startswith("<="):
                     upper_val = upper_part.replace("<=", "").strip()
@@ -124,8 +146,10 @@ class SQLDerivation(BaseDerivation):
                     # Fallback for unexpected format
                     case_parts.append(f"WHEN {condition} THEN '{label}'")
                     continue
-                
-                case_parts.append(f"WHEN {source} {lower_op} {lower_val} AND {source} {upper_op} {upper_val} THEN '{label}'")
+
+                case_parts.append(
+                    f"WHEN {source} {lower_op} {lower_val} AND {source} {upper_op} {upper_val} THEN '{label}'"
+                )
             elif condition.startswith("<="):
                 value = condition[2:].strip()
                 case_parts.append(f"WHEN {source} <= {value} THEN '{label}'")
@@ -147,12 +171,17 @@ class SQLDerivation(BaseDerivation):
         # Execute using Polars expressions
         ctx = pl.SQLContext(frame=temp_df)
         try:
-            result_df = ctx.execute(f"SELECT {case_expr} as result FROM frame").collect()
+            result_df = ctx.execute(
+                f"SELECT {case_expr} as result FROM frame"
+            ).collect()
             return result_df["result"]
         except Exception as e:
             logger.warning(f"Cut execution failed: {e}")
             return pl.Series([None] * len(series))
-    def _derive_source(self, derivation: dict[str, Any], key_vars: list[str]) -> pl.Series:
+
+    def _derive_source(
+        self, derivation: dict[str, Any], key_vars: list[str]
+    ) -> pl.Series:
         """Derive from source with optional mapping, filter, and aggregation."""
 
         source = derivation["source"]
@@ -160,11 +189,11 @@ class SQLDerivation(BaseDerivation):
         # Parse source reference (e.g., "DM.AGE" or "AGE")
         # Parse source reference (e.g., "DM.AGE" or "AGE")
         series: pl.Series
-        
+
         if "." in source:
             dataset_name, column_name = source.split(".", 1)
             source_col = f"{dataset_name}.{column_name}"
-            
+
             # Build SQL query
 
             # Handle aggregation
@@ -176,12 +205,15 @@ class SQLDerivation(BaseDerivation):
             else:
                 # Simple source with optional filter
                 sql_query = self._build_source_sql(
-                    source_col, derivation.get("filter"), derivation.get("mapping"), key_vars
+                    source_col,
+                    derivation.get("filter"),
+                    derivation.get("mapping"),
+                    key_vars,
                 )
 
             # Execute SQL using Polars SQL context
             series = self._execute_sql(sql_query, key_vars)
-            
+
         else:
             # Column from target dataset
             if source in self.target_df.columns:
@@ -193,7 +225,7 @@ class SQLDerivation(BaseDerivation):
 
         # Auto-Strip Whitespace
         if series.dtype == pl.Utf8:
-             series = series.str.strip_chars()
+            series = series.str.strip_chars()
 
         # Apply mapping if present (legacy / optimization for local cols)
         if "mapping" in derivation:
@@ -225,11 +257,21 @@ class SQLDerivation(BaseDerivation):
             sql_condition = sql_condition.replace("=", "___EQ___")
 
             # Now replace back with source reference
-            sql_condition = sql_condition.replace("___GTE___", f">= {source} AND {source} >=")
-            sql_condition = sql_condition.replace("___LTE___", f"<= {source} AND {source} <=")
-            sql_condition = sql_condition.replace("___GT___", f"> {source} AND {source} >")
-            sql_condition = sql_condition.replace("___LT___", f"< {source} AND {source} <")
-            sql_condition = sql_condition.replace("___EQ___", f"= {source} AND {source} =")
+            sql_condition = sql_condition.replace(
+                "___GTE___", f">= {source} AND {source} >="
+            )
+            sql_condition = sql_condition.replace(
+                "___LTE___", f"<= {source} AND {source} <="
+            )
+            sql_condition = sql_condition.replace(
+                "___GT___", f"> {source} AND {source} >"
+            )
+            sql_condition = sql_condition.replace(
+                "___LT___", f"< {source} AND {source} <"
+            )
+            sql_condition = sql_condition.replace(
+                "___EQ___", f"= {source} AND {source} ="
+            )
 
             # Clean up the condition
             # For patterns like "<18", ">=18 and <65", ">=65"
@@ -240,7 +282,9 @@ class SQLDerivation(BaseDerivation):
                 parts = condition.split(" and ")
                 lower = parts[0].replace(">=", "").strip()
                 upper = parts[1].replace("<", "").strip()
-                case_parts.append(f"WHEN {source} >= {lower} AND {source} < {upper} THEN '{label}'")
+                case_parts.append(
+                    f"WHEN {source} >= {lower} AND {source} < {upper} THEN '{label}'"
+                )
             elif condition.startswith(">="):
                 value = condition[2:].strip()
                 case_parts.append(f"WHEN {source} >= {value} THEN '{label}'")
@@ -361,7 +405,10 @@ class SQLDerivation(BaseDerivation):
                 if available_keys and dataset_name not in merged_df.columns:
                     # Join the source data
                     merged_df = merged_df.join(
-                        df, on=available_keys, how="left", suffix=f"_{dataset_name.lower()}"
+                        df,
+                        on=available_keys,
+                        how="left",
+                        suffix=f"_{dataset_name.lower()}",
                     )
 
         # Create SQL context and execute
@@ -373,7 +420,7 @@ class SQLDerivation(BaseDerivation):
             # Replace DM.COLUMN with "DM.COLUMN" for proper SQL
             import re
 
-            sql_quoted = re.sub(r"(\w+)\.(\w+)", r'`\1.\2`', sql)
+            sql_quoted = re.sub(r"(\w+)\.(\w+)", r"`\1.\2`", sql)
 
             result_df = ctx.execute(sql_quoted).collect()
 
@@ -384,12 +431,14 @@ class SQLDerivation(BaseDerivation):
                 # Deduplicate result_df on key_vars to ensure 1-to-1 mapping
                 result_df = result_df.unique(subset=key_vars, keep="first")
                 # Join to get all rows aligned correctly
-                final_df = self.target_df.select(key_vars).join(result_df, on=key_vars, how="left")
+                final_df = self.target_df.select(key_vars).join(
+                    result_df, on=key_vars, how="left"
+                )
                 return final_df["result"]
-            
+
             elif len(result_df) == len(self.target_df):
-                 # No keys (rare), assume safe only if 1:1 and no order change (risky but fallback)
-                 return result_df["result"]
+                # No keys (rare), assume safe only if 1:1 and no order change (risky but fallback)
+                return result_df["result"]
             else:
                 # Fallback - ensure we return right number of rows
                 return pl.Series([None] * self.target_df.height)
@@ -471,23 +520,36 @@ class SQLDerivation(BaseDerivation):
 
             if subject_data.height > 0 and source_col in subject_data.columns:
                 # Calculate distance to target date
-                if target_col in subject_data.columns and date_col in subject_data.columns:
+                if (
+                    target_col in subject_data.columns
+                    and date_col in subject_data.columns
+                ):
                     # Get target date (should be same for all rows of this subject)
                     target_date = subject_data[target_col][0]
-                    
+
                     # Skip if target date is null
                     if target_date is None:
                         result_list.append(subject_data[source_col][0])
                         continue
-                    
+
                     # Calculate date differences and find closest
                     # Handle multiple formats: "YYYY-MM-DD HH:MM:SS", "YYYY-MM-DDTHH:MM:SS" (ISO), or "YYYY-MM-DD"
                     # We convert everything to Datetime for precision comparison (ms level)
                     def parse_to_datetime(expr: pl.Expr) -> pl.Expr:
                         return (
-                            expr.str.strptime(pl.Datetime, "%Y-%m-%d %H:%M:%S", strict=False)
-                            .fill_null(expr.str.strptime(pl.Datetime, "%Y-%m-%dT%H:%M:%S", strict=False))
-                            .fill_null(expr.str.strptime(pl.Date, "%Y-%m-%d", strict=False).cast(pl.Datetime))
+                            expr.str.strptime(
+                                pl.Datetime, "%Y-%m-%d %H:%M:%S", strict=False
+                            )
+                            .fill_null(
+                                expr.str.strptime(
+                                    pl.Datetime, "%Y-%m-%dT%H:%M:%S", strict=False
+                                )
+                            )
+                            .fill_null(
+                                expr.str.strptime(
+                                    pl.Date, "%Y-%m-%d", strict=False
+                                ).cast(pl.Datetime)
+                            )
                         )
 
                     with_diff = subject_data.with_columns(
@@ -518,57 +580,65 @@ class SQLDerivation(BaseDerivation):
         # Create result series matching target_df order
         # Fix: Zip the unique subjects (keys) with their results
         result_dict = dict(zip(unique_subjects, result_list))
-        result = [result_dict.get(subj) for subj in self.target_df[key_vars[0]].to_list()]
+        result = [
+            result_dict.get(subj) for subj in self.target_df[key_vars[0]].to_list()
+        ]
 
         logger.info(
             f"Applied closest aggregation, {sum(v is not None for v in result)} non-null values"
         )
         return pl.Series(result)
 
-    def _apply_mapping(self, series: pl.Series, mapping: dict[str, str], default: Any = None, case_sensitive: bool = True) -> pl.Series:
+    def _apply_mapping(
+        self,
+        series: pl.Series,
+        mapping: dict[str, str],
+        default: Any = None,
+        case_sensitive: bool = True,
+    ) -> pl.Series:
         """Apply value mapping to a series."""
         if not mapping:
             return series
-            
-        try:
-             # Handle "Null" string in config as actual None
-             clean_mapping = {k: (None if v == "Null" else v) for k, v in mapping.items()}
-             
-             if not case_sensitive:
-                 # Case insensitive logic
-                 lower_mapping = {k.lower(): v for k, v in clean_mapping.items()}
-                 lower_series = series.str.to_lowercase()
-                 
-                 if default is not None:
-                     # If default is provided, replace works nicely on lower_series
-                     return lower_series.replace(lower_mapping, default=default)
-                 else:
-                     # If no default (keep original), we only want to replace MATCHES
-                     # replace() on lower_series will return lowercased originals for non-matches
-                     # So we use when/then to conditionally apply the mapping
-                     mapped_lower = lower_series.replace(lower_mapping)
-                     is_mapped = lower_series.is_in(list(lower_mapping.keys()))
 
-                     # Must execute the expression to get a Series
-                     temp_df = pl.DataFrame({
-                         "original": series,
-                         "mapped": mapped_lower,
-                         "mask": is_mapped
-                     })
-                     
-                     return temp_df.select(
-                         pl.when(pl.col("mask"))
-                         .then(pl.col("mapped"))
-                         .otherwise(pl.col("original"))
-                     ).to_series()
-             
-             else:
-                 # Standard strict mapping (Default)
-                 if default is not None:
-                     return series.replace(clean_mapping, default=default)
-                 else:
-                     return series.replace(clean_mapping)
+        try:
+            # Handle "Null" string in config as actual None
+            clean_mapping = {
+                k: (None if v == "Null" else v) for k, v in mapping.items()
+            }
+
+            if not case_sensitive:
+                # Case insensitive logic
+                lower_mapping = {k.lower(): v for k, v in clean_mapping.items()}
+                lower_series = series.str.to_lowercase()
+
+                if default is not None:
+                    # If default is provided, replace works nicely on lower_series
+                    return lower_series.replace(lower_mapping, default=default)
+                else:
+                    # If no default (keep original), we only want to replace MATCHES
+                    # replace() on lower_series will return lowercased originals for non-matches
+                    # So we use when/then to conditionally apply the mapping
+                    mapped_lower = lower_series.replace(lower_mapping)
+                    is_mapped = lower_series.is_in(list(lower_mapping.keys()))
+
+                    # Must execute the expression to get a Series
+                    temp_df = pl.DataFrame(
+                        {"original": series, "mapped": mapped_lower, "mask": is_mapped}
+                    )
+
+                    return temp_df.select(
+                        pl.when(pl.col("mask"))
+                        .then(pl.col("mapped"))
+                        .otherwise(pl.col("original"))
+                    ).to_series()
+
+            else:
+                # Standard strict mapping (Default)
+                if default is not None:
+                    return series.replace(clean_mapping, default=default)
+                else:
+                    return series.replace(clean_mapping)
 
         except Exception as e:
-             logger.warning(f"Mapping failed: {e}")
-             return series
+            logger.warning(f"Mapping failed: {e}")
+            return series

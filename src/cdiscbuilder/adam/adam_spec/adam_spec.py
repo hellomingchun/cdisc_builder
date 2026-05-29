@@ -278,7 +278,9 @@ class AdamSpec:
 
     def to_yaml(self, include_parents: bool = False) -> str:
         """Convert to YAML string."""
-        return yaml.dump(self.to_dict(include_parents), default_flow_style=False, sort_keys=False)
+        return yaml.dump(
+            self.to_dict(include_parents), default_flow_style=False, sort_keys=False
+        )
 
     def save(self, output_path: str | Path) -> None:
         """Save specification to YAML file."""
@@ -289,7 +291,9 @@ class AdamSpec:
 
         logger.info(f"Saved YAML specification to {output}")
 
-    def get_column_specs(self, names: str | list[str] | None = None) -> dict | list[dict] | None:
+    def get_column_specs(
+        self, names: str | list[str] | None = None
+    ) -> dict | list[dict] | None:
         """
         Get column specifications.
 
@@ -366,7 +370,9 @@ class AdamSpec:
             sdtm_dir = self._raw_spec.get("sdtm_dir")
 
         if not sdtm_dir:
-            raise ValueError(f"No dir.sdtm specified in {self.path}. This is a required field.")
+            raise ValueError(
+                f"No dir.sdtm specified in {self.path}. This is a required field."
+            )
 
         # Convert to Path for proper handling
         sdtm_path = Path(sdtm_dir)
@@ -393,7 +399,9 @@ class AdamSpec:
         adam_dir = dir_config.get("adam")
 
         if not adam_dir:
-            raise ValueError(f"No dir.adam specified in {self.path}. This is a required field.")
+            raise ValueError(
+                f"No dir.adam specified in {self.path}. This is a required field."
+            )
 
         # Convert to Path for proper handling
         adam_path = Path(adam_dir)

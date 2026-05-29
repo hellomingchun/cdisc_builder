@@ -63,13 +63,17 @@ class SDTMLoader:
             unique_domains = df["DOMAIN"].unique()
             if len(unique_domains) == 1:
                 domain_value = unique_domains[0]
-                self.logger.debug(f"Using DOMAIN value '{domain_value}' for dataset {dataset_name}")
+                self.logger.debug(
+                    f"Using DOMAIN value '{domain_value}' for dataset {dataset_name}"
+                )
             else:
                 self.logger.warning(
                     f"Multiple DOMAIN values in {dataset_name}: {unique_domains}, using filename"
                 )
         else:
-            self.logger.debug(f"No DOMAIN column in {dataset_name}, using filename for renaming")
+            self.logger.debug(
+                f"No DOMAIN column in {dataset_name}, using filename for renaming"
+            )
 
         # Rename columns if requested
         if rename_columns:
@@ -111,7 +115,9 @@ class SDTMLoader:
         datasets = {}
         for name in dataset_names:
             try:
-                datasets[name.upper()] = self.load_dataset(name, rename_columns, preserve_keys)
+                datasets[name.upper()] = self.load_dataset(
+                    name, rename_columns, preserve_keys
+                )
             except FileNotFoundError as e:
                 self.logger.warning(f"Could not load {name}: {e}")
 

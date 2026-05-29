@@ -14,7 +14,7 @@ dependencies = [
     "polars>=0.20.0",
     "reactable>=0.1.6"
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 
 [project.scripts]
 cdisc-sdtm = "cdiscbuilder.cli:main"

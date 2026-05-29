@@ -10,7 +10,11 @@ from pathlib import Path
 import polars as pl
 import polars.selectors as cs
 
-from cdiscbuilder.sdtm.loader.load import odm_xml_to_df, odm_xml_to_df_dict, remove_namespaces  # pyre-ignore[21]
+from cdiscbuilder.sdtm.loader.load import (
+    odm_xml_to_df,
+    odm_xml_to_df_dict,
+    remove_namespaces,
+)  # pyre-ignore[21]
 
 
 class TestRemoveNamespaces(unittest.TestCase):
@@ -110,7 +114,9 @@ class TestODMXMLToDataFrame(unittest.TestCase):
         </ODM>"""
 
         # Create a temporary XML file
-        self.temp_file = tempfile.NamedTemporaryFile(mode="w", suffix=".xml", delete=False)
+        self.temp_file = tempfile.NamedTemporaryFile(
+            mode="w", suffix=".xml", delete=False
+        )
         self.temp_file.write(self.sample_xml)
         self.temp_file.close()
         self.temp_path = Path(self.temp_file.name)

@@ -61,9 +61,13 @@ class DerivationLogger:
         self.logs.append(log_entry)
         self.logger.info(f"Derived {column} using {method} from {source or 'constant'}")
 
-    def log_error(self, column: str, method: str, error: str, source: str = None):  # pyre-ignore[9]
+    def log_error(
+        self, column: str, method: str, error: str, source: str = None
+    ):  # pyre-ignore[9]
         """Log derivation error"""
-        log_entry = DerivationLog(column=column, method=method, source=source, error=error)
+        log_entry = DerivationLog(
+            column=column, method=method, source=source, error=error
+        )
         self.errors.append(log_entry)
         self.logger.error(f"Failed to derive {column}: {error}")
 

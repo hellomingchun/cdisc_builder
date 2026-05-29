@@ -3,18 +3,31 @@ import argparse
 from .sdtm.odm_parser import parse_odm_to_long_df, extract_metadata_summary
 from .sdtm.sdtm import create_sdtm_datasets
 
+
 def main():
     parser = argparse.ArgumentParser(description="Convert ODM XML to SDTM Datasets")
     # Determine default config path inside package
     current_dir = os.path.dirname(__file__)
     default_config_path = os.path.join(current_dir, "specs")
-    
+
     parser.add_argument("--xml", required=True, help="Path to input ODM XML file")
-    parser.add_argument("--csv", default="odm_long.csv", help="Path to intermediate long CSV file")
-    parser.add_argument("--metadata-summary", "-m", help="Path to output metadata summary CSV file (Data Dictionary)")
-    parser.add_argument("--configs", default=default_config_path, help="Path to SDTM configuration directory")
-    parser.add_argument("--output", default="sdtm_output", help="Path to output SDTM directory")
-    
+    parser.add_argument(
+        "--csv", default="odm_long.csv", help="Path to intermediate long CSV file"
+    )
+    parser.add_argument(
+        "--metadata-summary",
+        "-m",
+        help="Path to output metadata summary CSV file (Data Dictionary)",
+    )
+    parser.add_argument(
+        "--configs",
+        default=default_config_path,
+        help="Path to SDTM configuration directory",
+    )
+    parser.add_argument(
+        "--output", default="sdtm_output", help="Path to output SDTM directory"
+    )
+
     args = parser.parse_args()
 
     # Step 1: ODM XML -> Long CSV
@@ -27,19 +40,23 @@ def main():
 
         # Generating Metadata Summary
         if args.metadata_summary:
-            print(f"\n--- Generating Metadata Summary (Data Dictionary) ---")
+            print("\n--- Generating Metadata Summary (Data Dictionary) ---")
             meta_df = extract_metadata_summary(df)
             meta_df.to_csv(args.metadata_summary, index=False)
-            print(f"Saved metadata summary to {args.metadata_summary} (Shape: {meta_df.shape})")
+            print(
+                f"Saved metadata summary to {args.metadata_summary} (Shape: {meta_df.shape})"
+            )
     except Exception as e:
         print(f"Error parsing XML: {e}")
         return
 
     # Step 2: Long CSV -> SDTM Datasets
-    print(f"\n--- Step 2: Generating SDTM Datasets using configs from {args.configs} ---")
+    print(
+        f"\n--- Step 2: Generating SDTM Datasets using configs from {args.configs} ---"
+    )
     if not os.path.exists(args.output):
         os.makedirs(args.output)
-        
+
     try:
         create_sdtm_datasets(args.configs, args.csv, args.output)
         print(f"\nSuccess! SDTM datasets created in {args.output}")

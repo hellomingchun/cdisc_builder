@@ -14,7 +14,9 @@ class DataValidator:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
 
-    def validate_dataset(self, df: pl.DataFrame, spec: dict[str, Any]) -> list[dict[str, Any]]:
+    def validate_dataset(
+        self, df: pl.DataFrame, spec: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """
         Validate dataset against specification
 
@@ -72,7 +74,10 @@ class DataValidator:
         for key_var in key_vars:
             if key_var not in df.columns:
                 results.append(
-                    {"status": "error", "message": f"Key variable {key_var} not found in dataset"}
+                    {
+                        "status": "error",
+                        "message": f"Key variable {key_var} not found in dataset",
+                    }
                 )
 
         # Check for duplicate keys if all key variables present
@@ -102,7 +107,9 @@ class DataValidator:
 
         return results
 
-    def _validate_column(self, series: pl.Series, col_spec: dict[str, Any]) -> list[dict[str, Any]]:
+    def _validate_column(
+        self, series: pl.Series, col_spec: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """
         Validate a single column
 

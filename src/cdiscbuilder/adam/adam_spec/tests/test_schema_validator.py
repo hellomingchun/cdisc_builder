@@ -25,7 +25,9 @@ class TestSchemaValidator(unittest.TestCase):
             yaml.dump(
                 {
                     "root": {"required": ["domain", "columns"], "optional": ["key"]},
-                    "fields": {"domain": {"type": "str", "pattern": "^AD[A-Z0-9]{0,6}$"}},
+                    "fields": {
+                        "domain": {"type": "str", "pattern": "^AD[A-Z0-9]{0,6}$"}
+                    },
                     "column": {
                         "required": ["name", "type"],
                         "fields": {
@@ -40,7 +42,10 @@ class TestSchemaValidator(unittest.TestCase):
         # Valid spec
         self.valid_spec = {
             "domain": "ADSL",
-            "columns": [{"name": "USUBJID", "type": "str"}, {"name": "AGE", "type": "int"}],
+            "columns": [
+                {"name": "USUBJID", "type": "str"},
+                {"name": "AGE", "type": "int"},
+            ],
         }
 
         # Invalid spec

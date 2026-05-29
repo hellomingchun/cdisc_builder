@@ -1,6 +1,7 @@
 import pandas as pd
 from abc import ABC, abstractmethod
 
+
 class BaseProcessor(ABC):
     def __init__(self):
         self.class_name = "GENERAL"
@@ -23,36 +24,40 @@ class BaseProcessor(ABC):
         """Applies standard SDTM mappings like type conversion and value mapping."""
         if series is None:
             return None
-            
-        target_type = col_config.get('type')
-        value_map = col_config.get('value_mapping') or col_config.get('mapping_value')
-        case_sensitive = col_config.get('case_sensitive', True)
-        
+
+        target_type = col_config.get("type")
+        value_map = col_config.get("value_mapping") or col_config.get("mapping_value")
+        case_sensitive = col_config.get("case_sensitive", True)
+
         # 1. Value Mapping
         if value_map:
             if not case_sensitive:
                 clean_map = {str(k).lower(): v for k, v in value_map.items()}
-                series = series.astype(str).str.lower().map(clean_map).combine_first(series)
+                series = (
+                    series.astype(str).str.lower().map(clean_map).combine_first(series)
+                )
             else:
                 series = series.replace(value_map)
-                
+
         # 2. Prefix
-        prefix = col_config.get('prefix')
+        prefix = col_config.get("prefix")
         if prefix:
             series = prefix + series.astype(str)
-            
+
         # 3. Type Conversion
         if target_type:
             try:
-                if target_type == 'int':
-                    series = pd.to_numeric(series, errors='coerce').astype('Int64')
-                elif target_type == 'float':
-                    series = pd.to_numeric(series, errors='coerce')
-                elif target_type == 'date':
-                    series = pd.to_datetime(series, errors='coerce', format='mixed').dt.strftime('%Y-%m-%d')
-                elif target_type == 'str':
-                    series = series.astype(str).replace('nan', None)
+                if target_type == "int":
+                    series = pd.to_numeric(series, errors="coerce").astype("Int64")
+                elif target_type == "float":
+                    series = pd.to_numeric(series, errors="coerce")
+                elif target_type == "date":
+                    series = pd.to_datetime(
+                        series, errors="coerce", format="mixed"
+                    ).dt.strftime("%Y-%m-%d")
+                elif target_type == "str":
+                    series = series.astype(str).replace("nan", None)
             except Exception as e:
                 print(f"Error converting to {target_type}: {e}")
-                
+
         return series

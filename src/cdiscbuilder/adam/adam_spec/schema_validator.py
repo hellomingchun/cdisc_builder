@@ -292,11 +292,20 @@ class SchemaValidator:
             for field_name, field_value in col.items():
                 if field_name in column_field_schemas:
                     self._validate_column_field(
-                        col_name, i, field_name, field_value, column_field_schemas[field_name]
+                        col_name,
+                        i,
+                        field_name,
+                        field_value,
+                        column_field_schemas[field_name],
                     )
-                elif field_name not in required_fields and field_name not in optional_fields:
+                elif (
+                    field_name not in required_fields
+                    and field_name not in optional_fields
+                ):
                     # Unknown field - just log
-                    logger.debug(f"Unknown column field '{field_name}' in column '{col_name}'")
+                    logger.debug(
+                        f"Unknown column field '{field_name}' in column '{col_name}'"
+                    )
 
         # Check for duplicate column names
         seen_names = set()
@@ -414,10 +423,17 @@ class SchemaValidator:
 
         # Dict validations (for derivation, validation sub-fields)
         if isinstance(value, dict) and "fields" in schema:
-            self._validate_nested_fields(col_name, col_index, field_name, value, schema["fields"])
+            self._validate_nested_fields(
+                col_name, col_index, field_name, value, schema["fields"]
+            )
 
     def _validate_nested_fields(
-        self, col_name: str, col_index: int, parent_field: str, value: dict, fields_schema: dict
+        self,
+        col_name: str,
+        col_index: int,
+        parent_field: str,
+        value: dict,
+        fields_schema: dict,
     ) -> None:
         """Validate nested fields within a column field (e.g., derivation, validation)"""
         for sub_field, sub_value in value.items():
@@ -459,7 +475,9 @@ class SchemaValidator:
         if not key_vars:
             return
 
-        column_names = {col.get("name") for col in spec.get("columns", []) if col.get("name")}
+        column_names = {
+            col.get("name") for col in spec.get("columns", []) if col.get("name")
+        }
 
         for key_var in key_vars:
             if key_var not in column_names:
@@ -502,7 +520,9 @@ class SchemaValidator:
 
             # String types shouldn't have numeric min/max (unless they're lengths)
             elif col_type == "str":
-                if "min" in col_validation and not isinstance(col_validation["min"], str):
+                if "min" in col_validation and not isinstance(
+                    col_validation["min"], str
+                ):
                     self.results.append(
                         ValidationResult(
                             field=f"columns[{i}].validation.min",
@@ -514,7 +534,9 @@ class SchemaValidator:
                         )
                     )
 
-                if "max" in col_validation and not isinstance(col_validation["max"], str):
+                if "max" in col_validation and not isinstance(
+                    col_validation["max"], str
+                ):
                     self.results.append(
                         ValidationResult(
                             field=f"columns[{i}].validation.max",
@@ -718,7 +740,9 @@ class SchemaValidator:
             lines.append("-" * 40)
             for r in results:
                 icon = (
-                    "[X]" if r.severity == "error" else "[!]" if r.severity == "warning" else "[i]"
+                    "[X]"
+                    if r.severity == "error"
+                    else "[!]" if r.severity == "warning" else "[i]"
                 )
                 lines.append(f"  {icon} [{r.severity.upper()}] {r.rule}")
                 lines.append(f"     {r.message}")

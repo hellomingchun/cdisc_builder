@@ -37,7 +37,9 @@ class AdamDerivation:
         key_deps = [dep for dep in dependencies if dep["adam_variable"] in key_vars]
 
         source_dataset = key_deps[0]["sdtm_data"]
-        key_columns_map = {dep["adam_variable"]: dep["sdtm_variable"] for dep in key_deps}
+        key_columns_map = {
+            dep["adam_variable"]: dep["sdtm_variable"] for dep in key_deps
+        }
 
         # Use already loaded renamed data (key variables are preserved)
         source_df = self.source_data[source_dataset]
@@ -58,7 +60,9 @@ class AdamDerivation:
                 f"Total: {n_rows}, Unique: {n_unique}"
             )
 
-            duplicated = base_df.filter(base_df.select(key_vars).is_duplicated()).head(5)
+            duplicated = base_df.filter(base_df.select(key_vars).is_duplicated()).head(
+                5
+            )
             self.logger.error(f"Sample duplicates:\n{duplicated}")
 
             base_df = base_df.unique(subset=key_vars, keep="first")
@@ -72,7 +76,11 @@ class AdamDerivation:
         """Load all required source data once."""
         dependencies = self.spec.get_data_dependency()
         required_datasets = list(
-            {dep["sdtm_data"] for dep in dependencies if dep["sdtm_data"] != self.spec.domain}
+            {
+                dep["sdtm_data"]
+                for dep in dependencies
+                if dep["sdtm_data"] != self.spec.domain
+            }
         )
 
         key_vars = self.spec.key or []
@@ -102,19 +110,25 @@ class AdamDerivation:
         col_spec["_key_vars"] = self.spec.key or ["USUBJID"]
 
         derivation_obj = self._get_derivation(col_spec)
-        self.logger.info(f"Deriving {col_spec['name']} using {derivation_obj.__class__.__name__}")
+        self.logger.info(
+            f"Deriving {col_spec['name']} using {derivation_obj.__class__.__name__}"
+        )
 
         # Setup context and derive
         # Setup context and derive
         derivation_obj.setup(col_spec, self.source_data, self.target_df)
         derived_series = derivation_obj.derive()
-        
+
         # Enforce Type
         derived_series = self._apply_final_type_casting(derived_series, col_spec)
 
-        self.target_df = self.target_df.with_columns(derived_series.alias(col_spec["name"]))
+        self.target_df = self.target_df.with_columns(
+            derived_series.alias(col_spec["name"])
+        )
 
-    def _apply_final_type_casting(self, series: pl.Series, col_spec: dict[str, Any]) -> pl.Series:
+    def _apply_final_type_casting(
+        self, series: pl.Series, col_spec: dict[str, Any]
+    ) -> pl.Series:
         """Apply final type casting based on spec."""
         target_type = col_spec.get("type")
         if not target_type:
@@ -140,7 +154,9 @@ class AdamDerivation:
                 else:
                     return series.cast(pl.Boolean, strict=False)
         except Exception as e:
-            self.logger.warning(f"Type enforcement failed for {col_spec['name']} ({target_type}): {e}")
+            self.logger.warning(
+                f"Type enforcement failed for {col_spec['name']} ({target_type}): {e}"
+            )
             return series
 
     def build(self) -> pl.DataFrame:
@@ -166,7 +182,9 @@ class AdamDerivation:
                 self.logger.error(f"Failed to derive {col_name}: {e}")
                 # Add null column to maintain structure
                 if self.target_df.height > 0:
-                    self.target_df = self.target_df.with_columns(pl.lit(None).alias(col_name))
+                    self.target_df = self.target_df.with_columns(
+                        pl.lit(None).alias(col_name)
+                    )
 
         self.logger.info(f"Derivation complete: {self.target_df.shape}")
         return self.target_df

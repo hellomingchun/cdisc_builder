@@ -28,7 +28,10 @@ class TestMergeYaml(unittest.TestCase):
                 {
                     "domain": "BASE",
                     "key": ["ID"],
-                    "columns": [{"name": "COL1", "type": "str"}, {"name": "COL2", "type": "int"}],
+                    "columns": [
+                        {"name": "COL1", "type": "str"},
+                        {"name": "COL2", "type": "int"},
+                    ],
                 },
                 f,
             )
@@ -37,7 +40,10 @@ class TestMergeYaml(unittest.TestCase):
             yaml.dump(
                 {
                     "domain": "OVERRIDE",
-                    "columns": [{"name": "COL2", "type": "float"}, {"name": "COL3", "type": "str"}],
+                    "columns": [
+                        {"name": "COL2", "type": "float"},
+                        {"name": "COL3", "type": "str"},
+                    ],
                 },
                 f,
             )
@@ -61,7 +67,9 @@ class TestMergeYaml(unittest.TestCase):
 
     def test_append_strategy(self):
         """Test list append strategy"""
-        result = merge_yaml([str(self.file1), str(self.file2)], list_merge_strategy="append")
+        result = merge_yaml(
+            [str(self.file1), str(self.file2)], list_merge_strategy="append"
+        )
 
         # Columns should be concatenated
         self.assertEqual(len(result["columns"]), 4)
