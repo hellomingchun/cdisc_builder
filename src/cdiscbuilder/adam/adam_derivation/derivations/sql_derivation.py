@@ -381,6 +381,8 @@ class SQLDerivation(BaseDerivation):
             # Fix: Always join if keys vary to ensure order safety
             # Previous optimization (len check) was unsafe for SQL aggregation
             if len(key_vars) > 0:
+                # Deduplicate result_df on key_vars to ensure 1-to-1 mapping
+                result_df = result_df.unique(subset=key_vars, keep="first")
                 # Join to get all rows aligned correctly
                 final_df = self.target_df.select(key_vars).join(result_df, on=key_vars, how="left")
                 return final_df["result"]

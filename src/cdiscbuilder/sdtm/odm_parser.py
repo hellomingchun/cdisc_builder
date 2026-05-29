@@ -104,3 +104,47 @@ def parse_odm_to_long_df(xml_file):
 
     df = pd.DataFrame(data_rows)
     return df
+
+def extract_metadata_summary(df_long):
+    """
+    Extracts a deduplicated metadata summary / data dictionary from the flat long DataFrame.
+    For each unique item, it retrieves up to 3 non-null, non-empty sample values.
+    """
+    if df_long is None or df_long.empty:
+        return pd.DataFrame(columns=['FormOID', 'ItemGroupOID', 'ItemOID', 'ItemName', 'Question', 'SampleValues'])
+    
+    meta_cols = ['FormOID', 'ItemGroupOID', 'ItemOID', 'ItemName', 'Question']
+    
+    # Verify required columns exist
+    missing_cols = [c for c in meta_cols if c not in df_long.columns]
+    if missing_cols:
+        raise ValueError(f"Input DataFrame is missing required metadata columns: {missing_cols}")
+        
+    # Deduplicate metadata records
+    meta_df = df_long[meta_cols].drop_duplicates(subset=['FormOID', 'ItemGroupOID', 'ItemOID']).copy()
+    
+    # Sort for consistent ordering
+    meta_df = meta_df.sort_values(by=['FormOID', 'ItemGroupOID', 'ItemOID']).reset_index(drop=True)
+    
+    # Extract distinct non-empty sample values for each item
+    sample_values_list = []
+    
+    # Group by FormOID, ItemGroupOID, ItemOID for efficient query or loop
+    for row in meta_df.itertuples():
+        # Get actual clinical values from df_long matching this specific item
+        val_filter = (
+            (df_long['FormOID'] == row.FormOID) & 
+            (df_long['ItemGroupOID'] == row.ItemGroupOID) & 
+            (df_long['ItemOID'] == row.ItemOID) & 
+            (df_long['Value'].notna())
+        )
+        values_series = df_long[val_filter]['Value'].astype(str).str.strip()
+        values_series = values_series[values_series != '']
+        
+        # Get up to 3 unique values
+        unique_vals = list(values_series.unique())[:3]
+        sample_values_list.append(str(unique_vals))
+        
+    meta_df['SampleValues'] = sample_values_list
+    return meta_df
+

@@ -45,6 +45,10 @@ create_sdtm_datasets(config_dir, xml_file, output_dir)
 
 ## Configuration
 
+For detailed and complete references on how to structure mapping specifications, see:
+* **[SDTM Mapping Specification](file:///c:/Users/mingc/Documents/projects/cdiscbuilder/cdisc_builder/docs/SDTM_MAPPING_SPECIFICATION.md)**: Details on the intermediate `odm_long.csv` schema, wide vs. findings domains, regex extraction, and validation rules.
+* **[ADaM Mapping Specification](file:///c:/Users/mingc/Documents/projects/cdiscbuilder/cdisc_builder/docs/ADAM_MAPPING_SPECIFICATION.md)**: Details on ADaM yaml configuration schema, inheritance, SQL-like derivations, conditions, and aggregations.
+
 The package comes with standard configurations for common domains (`DM`, `AE`, `VS`, etc.) in `src/cdisc_builder/specs`. You can override these or add new ones by creating your own configuration directory.
 
 ### Example YAML (`DM.yaml`)
