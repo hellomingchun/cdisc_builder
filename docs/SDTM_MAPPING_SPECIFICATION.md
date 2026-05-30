@@ -70,11 +70,35 @@ The output `metadata_summary.csv` contains the following columns:
 
 Mapping configurations are defined in YAML files located in a configuration directory. 
 
-* The directory must contain a `defaults.yaml` file to define global defaults (primarily `keys` for merging/pivoting).
+* The directory must contain a `defaults.yaml` file to define global defaults, keys, and custom ingestion/schema mappings.
 * Each mapping file corresponds to one or more SDTM domains. The root key of the YAML file matches the target domain abbreviation (e.g., `DM`, `AE`, `VS`).
 * Under the domain key, the configuration is structured as a **list of blocks**, each representing a different data source (Form/FormOID) to process.
 
 There are two primary paradigms of domains: **Wide Domains** and **Findings Domains**.
+
+### 2.1 Global Defaults (`defaults.yaml`)
+
+The `defaults.yaml` file configures global settings for the study. To support custom source systems (such as Medidata Rave) or bypass XML parsing to load existing flat CSV files with non-standard column names, you can specify custom mappings and keys here.
+
+```yaml
+# defaults.yaml
+
+# 1. Custom keys to pivot, sort, and group on (e.g. including custom RecordPosition)
+keys: ["StudyOID", "SubjectKey", "StudyEventOID", "RecordPosition"]
+
+# 2. For XML parsing: Map standard logical keys to custom XML attributes
+# (e.g. read the 'RecordPosition' attribute in the XML but standardize it to 'ItemGroupRepeatKey' in df_long)
+xml_mapping:
+  item_group_repeat_key: "RecordPosition"
+
+# 3. For Tabular Loading (e.g. direct csv load): Map standard logical keys to custom CSV columns
+# (The loader renames custom CSV columns to logical standard ones before processing)
+csv_columns:
+  item_group_repeat_key: "RecordPosition"
+  subject_key: "SubjectID"
+```
+
+If the input dataset is missing specific structural columns (like `FormOID` or `StudyEventRepeatKey` in a non-XML tabular dataset), the engine will automatically skip filtering on those columns and degrade gracefully.
 
 ---
 

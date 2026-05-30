@@ -59,7 +59,7 @@ class GeneralProcessor:
 
         return expanded_list
 
-    def process(self, domain_name, sources, df_long, default_keys):
+    def process(self, domain_name, sources, df_long, default_keys, custom_to_standard=None):
         domain_dfs = []
 
         # Pre-expand sources if they contain lists
@@ -76,25 +76,34 @@ class GeneralProcessor:
             form_oid = settings.get("formoid")
             if form_oid:
                 try:
-                    # Filter for specific FormOID(s)
-                    if isinstance(form_oid, list):
-                        source_df = df_long[df_long["FormOID"].isin(form_oid)].copy()
+                    if "FormOID" in df_long.columns:
+                        # Filter for specific FormOID(s)
+                        if isinstance(form_oid, list):
+                            source_df = df_long[df_long["FormOID"].isin(form_oid)].copy()
+                        else:
+                            source_df = df_long[df_long["FormOID"] == form_oid].copy()
                     else:
-                        source_df = df_long[df_long["FormOID"] == form_oid].copy()
+                        print(f"Warning: 'FormOID' column missing in source data. Skipping FormOID filtering.")
+                        source_df = df_long.copy()
                 except Exception as e:
                     print(
                         f"Error filtering for {domain_name} (FormOID={form_oid}): {e}"
                     )
                     continue
             else:
-                print(f"Warning: No formoid specified for a block in {domain_name}")
-                continue
+                if "FormOID" in df_long.columns:
+                    print(f"Warning: No formoid specified for a block in {domain_name}")
+                    continue
+                else:
+                    source_df = df_long.copy()
 
             if source_df.empty:
                 continue
 
             # 2. Key columns for pivoting (use block keys or defaults)
             keys = settings.get("keys", default_keys)
+            if custom_to_standard:
+                keys = [custom_to_standard.get(k, k) for k in keys]
 
             # 3. Pivot
             try:

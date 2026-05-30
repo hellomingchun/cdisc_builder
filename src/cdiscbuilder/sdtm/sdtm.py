@@ -11,12 +11,46 @@ def create_sdtm_datasets(config_input, input_csv, output_dir):
         config = load_config(config_input)
 
     # Get global defaults
-    default_keys = config.get("defaults", {}).get(
+    defaults = config.get("defaults", {})
+    default_keys = defaults.get(
         "keys", ["StudyOID", "SubjectKey", "ItemGroupRepeatKey", "StudyEventOID"]
     )
 
     print(f"Loading data from {input_csv}...")
     df_long = pd.read_csv(input_csv)
+
+    # Invert mapping to go from custom CSV column name -> standard logical column name
+    # e.g., "RecordPosition" -> "ItemGroupRepeatKey"
+    csv_columns = defaults.get("csv_columns") or {}
+    STANDARD_LOGICAL_COLUMNS = {
+        "study_oid": "StudyOID",
+        "subject_key": "SubjectKey",
+        "study_subject_id": "StudySubjectID",
+        "study_event_oid": "StudyEventOID",
+        "study_event_repeat_key": "StudyEventRepeatKey",
+        "study_event_start_date": "StudyEventStartDate",
+        "form_oid": "FormOID",
+        "item_group_oid": "ItemGroupOID",
+        "item_group_repeat_key": "ItemGroupRepeatKey",
+        "item_oid": "ItemOID",
+        "value": "Value",
+        "question": "Question",
+        "item_name": "ItemName",
+    }
+
+    custom_to_standard = {}
+    rename_map = {}
+    for logical_key, custom_col in csv_columns.items():
+        if logical_key in STANDARD_LOGICAL_COLUMNS:
+            standard_col = STANDARD_LOGICAL_COLUMNS[logical_key]
+            rename_map[custom_col] = standard_col
+            custom_to_standard[custom_col] = standard_col
+
+    # Perform rename if map is not empty
+    if rename_map:
+        df_long.rename(columns=rename_map, inplace=True)
+        # Translate default_keys to match the standardized DataFrame
+        default_keys = [custom_to_standard.get(k, k) for k in default_keys]
 
     # Prioritize DM domain processing
     domains = list(config["domains"].keys())
@@ -34,4 +68,4 @@ def create_sdtm_datasets(config_input, input_csv, output_dir):
         else:
             sources = [settings_entry]
 
-        process_domain(domain, sources, df_long, default_keys, output_dir)
+        process_domain(domain, sources, df_long, default_keys, output_dir, custom_to_standard=custom_to_standard)

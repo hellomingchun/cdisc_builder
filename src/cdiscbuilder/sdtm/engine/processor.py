@@ -8,7 +8,7 @@ from .classes.findings import FindingsProcessor
 from .classes.special_purpose import SpecialPurposeProcessor
 
 
-def process_domain(domain_name, sources, df_long, default_keys, output_dir):
+def process_domain(domain_name, sources, df_long, default_keys, output_dir, custom_to_standard=None):
     # Normalize to list
     if isinstance(sources, dict):
         sources = [sources]
@@ -31,7 +31,7 @@ def process_domain(domain_name, sources, df_long, default_keys, output_dir):
     else:
         processor = GeneralProcessor()
 
-    domain_dfs = processor.process(domain_name, sources, df_long, default_keys)
+    domain_dfs = processor.process(domain_name, sources, df_long, default_keys, custom_to_standard=custom_to_standard)
 
     if not domain_dfs:
         print(f"Warning: No data found for domain {domain_name}")

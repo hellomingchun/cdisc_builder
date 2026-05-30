@@ -1,1 +1,41 @@
+# Global defaults for SDTM mapping
+
+# 1. Custom keys to pivot, sort, and group on by default.
+# The engine uses these keys to pivot long-format data into wide-format domain tables.
 keys: ["StudyOID", "SubjectKey", "StudySubjectID", "StudyEventOID", "StudyEventRepeatKey", "ItemGroupRepeatKey"]
+
+# 2. XML Attribute Mapping (Optional)
+# If parsing raw ODM XML files, map standard logical attributes to custom XML attribute names.
+# Unspecified keys will use their standard defaults.
+#
+# xml_mapping:
+#   study_oid: "StudyOID"
+#   subject_key: "SubjectKey"
+#   study_subject_id: "StudySubjectID"
+#   study_event_oid: "StudyEventOID"
+#   study_event_repeat_key: "StudyEventRepeatKey"
+#   study_event_start_date: "StartDate"
+#   form_oid: "FormOID"
+#   item_group_oid: "ItemGroupOID"
+#   item_group_repeat_key: "ItemGroupRepeatKey"  # e.g., change to "RecordPosition" if your XML uses that
+#   item_oid: "ItemOID"
+#   value: "Value"
+
+# 3. CSV Column Mapping (Optional)
+# If loading pre-parsed long CSV/tabular files, map standard logical columns to custom CSV column names.
+# The loader renames these custom columns to standard logical names before domain processing.
+#
+# csv_columns:
+#   study_oid: "StudyOID"
+#   subject_key: "SubjectKey"
+#   study_subject_id: "StudySubjectID"
+#   study_event_oid: "StudyEventOID"
+#   study_event_repeat_key: "StudyEventRepeatKey"
+#   study_event_start_date: "StudyEventStartDate"
+#   form_oid: "FormOID"
+#   item_group_oid: "ItemGroupOID"
+#   item_group_repeat_key: "ItemGroupRepeatKey"  # e.g., change to "RecordPosition" if your CSV uses that
+#   item_oid: "ItemOID"
+#   value: "Value"
+#   question: "Question"
+#   item_name: "ItemName"

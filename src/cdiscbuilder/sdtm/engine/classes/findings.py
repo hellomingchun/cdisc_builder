@@ -10,7 +10,7 @@ class FindingsProcessor:
     def __init__(self):
         self.class_name = "FINDINGS"
 
-    def process(self, domain_name, sources, df_long, default_keys):
+    def process(self, domain_name, sources, df_long, default_keys, custom_to_standard=None):
         domain_dfs = []
 
         for settings in sources:
@@ -20,9 +20,8 @@ class FindingsProcessor:
             if form_oid:
                 if "FormOID" not in source_df.columns:
                     print(
-                        f"Warning: 'FormOID' column missing in source data for domain {domain_name}"
+                        f"Warning: 'FormOID' column missing in source data. Skipping FormOID filtering."
                     )
-                    source_df = pd.DataFrame(columns=source_df.columns)
                 else:
                     if isinstance(form_oid, list):
                         source_df = source_df[source_df["FormOID"].isin(form_oid)]
@@ -34,9 +33,8 @@ class FindingsProcessor:
             if item_group_match:
                 if "ItemGroupOID" not in source_df.columns:
                     print(
-                        f"Warning: 'ItemGroupOID' column missing in source data for domain {domain_name}"
+                        f"Warning: 'ItemGroupOID' column missing in source data. Skipping ItemGroupOID filtering."
                     )
-                    source_df = pd.DataFrame(columns=source_df.columns)
                 else:
                     source_df = source_df[
                         source_df["ItemGroupOID"].str.match(item_group_match, na=False)
@@ -47,9 +45,8 @@ class FindingsProcessor:
             if item_oid_match:
                 if "ItemOID" not in source_df.columns:
                     print(
-                        f"Warning: 'ItemOID' column missing in source data for domain {domain_name}"
+                        f"Warning: 'ItemOID' column missing in source data. Skipping ItemOID filtering."
                     )
-                    source_df = pd.DataFrame(columns=source_df.columns)
                 else:
                     source_df = source_df[
                         source_df["ItemOID"].str.match(item_oid_match, na=False)
@@ -60,6 +57,8 @@ class FindingsProcessor:
 
             # 3. Create Base DataFrame (No Pivot)
             keys = settings.get("keys", default_keys)
+            if custom_to_standard:
+                keys = [custom_to_standard.get(k, k) for k in keys]
 
             base_cols = keys + ["ItemOID", "Value"]
             if "Question" in source_df.columns:

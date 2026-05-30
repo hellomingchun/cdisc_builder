@@ -1,6 +1,8 @@
 AE:
   - type: events
     formoid: "F_ADVERSEEVENT"
+    # Local key override (optional): Overrides the default keys from defaults.yaml for this block.
+    # keys: ["StudyOID", "SubjectKey", "StudyEventOID", "StudyEventRepeatKey"]
     columns:
       STUDYID:
         source: "StudyOID"

@@ -2,7 +2,26 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 
 
-def parse_odm_to_long_df(xml_file):
+DEFAULT_XML_MAPPING = {
+    "study_oid": "StudyOID",
+    "subject_key": "SubjectKey",
+    "study_subject_id": "StudySubjectID",
+    "study_event_oid": "StudyEventOID",
+    "study_event_repeat_key": "StudyEventRepeatKey",
+    "study_event_start_date": "StartDate",
+    "form_oid": "FormOID",
+    "item_group_oid": "ItemGroupOID",
+    "item_group_repeat_key": "ItemGroupRepeatKey",
+    "item_oid": "ItemOID",
+    "value": "Value",
+}
+
+
+def parse_odm_to_long_df(xml_file, xml_mapping=None):
+    merged_xml_mapping = DEFAULT_XML_MAPPING.copy()
+    if xml_mapping:
+        merged_xml_mapping.update(xml_mapping)
+
     try:
         tree = ET.parse(xml_file)
         root = tree.getroot()
@@ -42,13 +61,15 @@ def parse_odm_to_long_df(xml_file):
 
     for cd in root:
         if get_local_name(cd.tag) == "ClinicalData":
-            study_oid = cd.get("StudyOID")
+            study_oid = cd.get(merged_xml_mapping["study_oid"])
             for sd in cd:
                 if get_local_name(sd.tag) == "SubjectData":
-                    subject_key = sd.get("SubjectKey")
+                    subject_key = sd.get(merged_xml_mapping["subject_key"])
 
                     # Helper for attributes
                     def get_attrib(elem, partial_name):
+                        if not partial_name:
+                            return None
                         if partial_name in elem.attrib:
                             return elem.attrib[partial_name]
                         for k, v in elem.attrib.items():
@@ -56,41 +77,46 @@ def parse_odm_to_long_df(xml_file):
                                 return v
                         return None
 
-                    study_subject_id = get_attrib(sd, "StudySubjectID") or get_attrib(
-                        sd, "studysubjectid"
-                    )
+                    study_subject_id_attr = merged_xml_mapping["study_subject_id"]
+                    study_subject_id = get_attrib(sd, study_subject_id_attr)
+                    if not study_subject_id and study_subject_id_attr:
+                        # try case-insensitive or fallback
+                        study_subject_id = get_attrib(sd, study_subject_id_attr.lower())
+                    if not study_subject_id:
+                        study_subject_id = get_attrib(sd, "studysubjectid")
+
                     if not subject_key:
                         subject_key = study_subject_id
 
                     for child in sd:
                         tag = get_local_name(child.tag)
                         if tag == "StudyEventData":
-                            study_event_oid = child.get("StudyEventOID")
+                            study_event_oid = child.get(merged_xml_mapping["study_event_oid"])
                             study_event_repeat_key = (
-                                child.get("StudyEventRepeatKey") or "1"
+                                child.get(merged_xml_mapping["study_event_repeat_key"]) or "1"
                             )
 
                             # Extract Namespaced StartDate
-                            start_date = get_attrib(child, "StartDate") or ""
+                            start_date = get_attrib(child, merged_xml_mapping["study_event_start_date"]) or ""
 
                             for form in child:
                                 f_tag = get_local_name(form.tag)
                                 if f_tag == "FormData":
-                                    form_oid = form.get("FormOID")
+                                    form_oid = form.get(merged_xml_mapping["form_oid"])
 
                                     for ig in form:
                                         ig_tag = get_local_name(ig.tag)
                                         if ig_tag == "ItemGroupData":
-                                            item_group_oid = ig.get("ItemGroupOID")
+                                            item_group_oid = ig.get(merged_xml_mapping["item_group_oid"])
                                             item_group_repeat_key = ig.get(
-                                                "ItemGroupRepeatKey"
+                                                merged_xml_mapping["item_group_repeat_key"]
                                             )
 
                                             for item in ig:
                                                 i_tag = get_local_name(item.tag)
                                                 if i_tag == "ItemData":
-                                                    item_oid = item.get("ItemOID")
-                                                    value = item.get("Value")
+                                                    item_oid = item.get(merged_xml_mapping["item_oid"])
+                                                    value = item.get(merged_xml_mapping["value"])
 
                                                     meta = item_metadata.get(
                                                         item_oid, {}

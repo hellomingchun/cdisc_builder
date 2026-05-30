@@ -30,10 +30,24 @@ def main():
 
     args = parser.parse_args()
 
+    # Load defaults from configs directory if present
+    defaults = {}
+    if args.configs and os.path.exists(args.configs):
+        defaults_path = os.path.join(args.configs, "defaults.yaml")
+        if os.path.exists(defaults_path):
+            import yaml
+            try:
+                with open(defaults_path, "r") as f:
+                    defaults = yaml.safe_load(f) or {}
+            except Exception as e:
+                print(f"Warning: Failed to load defaults.yaml from {defaults_path}: {e}")
+
+    xml_mapping = defaults.get("xml_mapping")
+
     # Step 1: ODM XML -> Long CSV
     print(f"--- Step 1: Parsing ODM XML from {args.xml} ---")
     try:
-        df = parse_odm_to_long_df(args.xml)
+        df = parse_odm_to_long_df(args.xml, xml_mapping=xml_mapping)
         print(f"Parsed {len(df)} rows.")
         df.to_csv(args.csv, index=False)
         print(f"Saved intermediate data to {args.csv}")
