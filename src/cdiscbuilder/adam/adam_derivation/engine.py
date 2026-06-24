@@ -122,6 +122,16 @@ class AdamDerivation:
         # Enforce Type
         derived_series = self._apply_final_type_casting(derived_series, col_spec)
 
+        # Apply Case
+        string_case = col_spec.get("case")
+        if string_case and derived_series.dtype == pl.Utf8:
+            if string_case == "upper":
+                derived_series = derived_series.str.to_uppercase()
+            elif string_case == "lower":
+                derived_series = derived_series.str.to_lowercase()
+            elif string_case == "title":
+                derived_series = derived_series.str.to_titlecase()
+
         self.target_df = self.target_df.with_columns(
             derived_series.alias(col_spec["name"])
         )

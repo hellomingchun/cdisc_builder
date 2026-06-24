@@ -1,6 +1,0 @@
-# default key words to define observation
-observation:
-  - name: week8
-    id: USUBJID
-    filter: COMP8FL == "Y" # SQL statement
-    label: Weeks 0 to 12

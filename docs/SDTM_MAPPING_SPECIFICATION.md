@@ -142,6 +142,7 @@ For each column in `columns`, the configuration can be a simple string (assumed 
 | `args` | `list` | Arguments to pass to `function`. For `calculate_study_day`, it must be a list of two columns: `[event_date, RFSTDTC]` (e.g., `[AESTDTC, DM.RFSTDTC]`). |
 | `group` | `list` | List of columns. Combines with `sort_by` to generate sequential counts starting at 1. Can be used for block-level or global sequencing. |
 | `sort_by` | `list` | List of columns to order the rows by before assigning sequence counts. |
+| `order` | `list` | List of strings (`"asc"` or `"desc"`) specifying the sort direction for each column in `sort_by`. |
 | `max_missing_pct` | `float` | Validation threshold. Prints a warning if the percentage of missing values in the final column exceeds this value. |
 
 ---
@@ -183,6 +184,7 @@ Supported properties:
 | `value_mapping` | `dict` | Dictionary mapping raw input values to target values. *Note: Lookup is strictly case-sensitive.* |
 | `group` | `list` | List of columns. Generates sequential counts starting at 1 (e.g., `group: ["USUBJID"]`). |
 | `sort_by` | `list` | List of columns to order the rows by before assigning sequence counts. |
+| `order` | `list` | List of strings (`"asc"` or `"desc"`) specifying the sort direction for each column in `sort_by`. |
 
 ---
 

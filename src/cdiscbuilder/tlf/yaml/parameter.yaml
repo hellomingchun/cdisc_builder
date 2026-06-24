@@ -1,8 +1,0 @@
-parameter:
-  - name: adsl.dcreascd
-    label: Discontinued Reason
-  - name: adsl.age
-    label: Age (Year)
-  - name: adsl.race
-    label: Race
-    

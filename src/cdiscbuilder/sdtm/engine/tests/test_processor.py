@@ -90,7 +90,7 @@ def test_process_domain_append_real(tmp_path):
         out_dir = tmp_path / "sdtm_out"
         process_domain("DM", sources, pd.DataFrame(), ["Subj"], str(out_dir))
 
-        out_file = out_dir / "DM.parquet"
+        out_file = out_dir / "dm.parquet"
         assert out_file.exists()
 
         res_df = pd.read_parquet(out_file)
@@ -114,7 +114,7 @@ def test_process_domain_merge_blocks(tmp_path):
         out_dir = tmp_path / "sdtm_out"
         process_domain("DM", sources, pd.DataFrame(), ["Subj"], str(out_dir))
 
-        res_df = pd.read_parquet(out_dir / "DM.parquet")
+        res_df = pd.read_parquet(out_dir / "dm.parquet")
         assert len(res_df) == 2
         assert "AGE" in res_df.columns
         assert "SEX" in res_df.columns
@@ -140,7 +140,7 @@ def test_process_domain_merge_blocks_missing_keys(tmp_path, capsys):
         out, err = capsys.readouterr()
         assert "missing keys: ['USUBJID']" in out
 
-        res_df = pd.read_parquet(out_dir / "DM.parquet")
+        res_df = pd.read_parquet(out_dir / "dm.parquet")
         # Appended instead of merged
         assert len(res_df) == 2
         assert "SEX" in res_df.columns
@@ -174,6 +174,6 @@ def test_process_domain_global_sequence(tmp_path):
         out_dir = tmp_path / "sdtm_out"
         process_domain("DM", sources, pd.DataFrame(), ["Subj"], str(out_dir))
 
-        res_df = pd.read_parquet(out_dir / "DM.parquet")
+        res_df = pd.read_parquet(out_dir / "dm.parquet")
         assert "SEQ" in res_df.columns
         assert list(res_df["SEQ"]) == [1, 2, 1, 2]

@@ -125,7 +125,7 @@ def test_create_sdtm_datasets_boundary_standardization(tmp_path):
     create_sdtm_datasets(str(spec_dir), str(input_csv), str(output_dir))
 
     # Verify dataset exists
-    out_file = output_dir / "AE.parquet"
+    out_file = output_dir / "ae.parquet"
     assert out_file.exists()
 
     res_df = pd.read_parquet(out_file)

@@ -123,7 +123,15 @@ derivation:
     "Female": "F"
 ```
 
-#### 4. Categorization (`cut`)
+#### 4. String Case Formatting (`case`)
+Applies casing formats to string variables (`upper`, `lower`, or `title`).
+```yaml
+derivation:
+  source: DM.AETERM
+  case: "upper"
+```
+
+#### 5. Categorization (`cut`)
 Categorizes continuous numeric variables into ranges.
 ```yaml
 derivation:

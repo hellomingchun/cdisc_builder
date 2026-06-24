@@ -168,6 +168,9 @@ class GeneralProcessor:
                         temp_df = final_df[group_cols].copy()
 
                         sort_keys = group_cols[:]  # Always sort by group first
+                        ascending_list = [True] * len(group_cols)
+                        
+                        order_cfg = col_config.get("order")
 
                         if sort_cols:
                             if not isinstance(sort_cols, list):
@@ -184,19 +187,31 @@ class GeneralProcessor:
                                 for c in sort_cols:
                                     temp_df[c] = final_df[c]
                                 sort_keys.extend(sort_cols)
+                                
+                                # Apply custom order if provided
+                                if order_cfg:
+                                    if not isinstance(order_cfg, list):
+                                        order_cfg = [order_cfg]
+                                    
+                                    # Map "asc"/"desc" to True/False for the sort_cols
+                                    for o in order_cfg:
+                                        if str(o).lower() in ["desc", "descending", "false"]:
+                                            ascending_list.append(False)
+                                        else:
+                                            ascending_list.append(True)
+                                else:
+                                    ascending_list.extend([True] * len(sort_cols))
 
                         # Sort
-                        temp_df = temp_df.sort_values(by=sort_keys)
+                        temp_df = temp_df.sort_values(by=sort_keys, ascending=ascending_list)
 
                         # Calculate Cumcount + 1
-                        seq_series = temp_df.groupby(group_cols).cumcount() + 1
+                        seq_series = temp_df.groupby(group_cols, sort=False).cumcount() + 1
 
                         # Map back to original index
                         series = seq_series.sort_index()
 
                 elif isinstance(col_config, dict) and col_config.get("function"):
-                    from ..functions import calculate_study_day
-
                     func_name = col_config.get("function")
                     args = col_config.get("args", [])
 
@@ -210,7 +225,7 @@ class GeneralProcessor:
                             arg_series.append(pivoted[arg])
                         else:
                             # Try loading from DM if it looks like DM.RFSTDTC
-                            if "." in arg:
+                            if isinstance(arg, str) and "." in arg:
                                 dname, vname = arg.split(".")
                                 # Only DM supported for now as reference
                                 if dname == "DM":
@@ -226,13 +241,44 @@ class GeneralProcessor:
                                 else:
                                     arg_series.append(pd.Series([None] * len(pivoted)))
                             else:
+                                # Not found locally, and not a string with a dot. Treat as a literal or unresolved?
+                                # Wait, ADaM's args might be string constants. Let's just append None for now as before.
                                 arg_series.append(pd.Series([None] * len(pivoted)))
 
-                    if func_name == "calculate_study_day" and len(arg_series) >= 2:
-                        series = calculate_study_day(arg_series[0], arg_series[1])
-                    else:
+                    import importlib
+                    import importlib.util
+                    from pathlib import Path
+                    
+                    def _load_function(fname):
+                        if "." not in fname:
+                            try:
+                                from cdiscbuilder.functions import get_function_path
+                                fname = get_function_path(fname)
+                            except (ImportError, KeyError):
+                                pass
+                                
+                        if "." in fname:
+                            parts = fname.rsplit(".", 1)
+                            module = importlib.import_module(parts[0])
+                            return getattr(module, parts[1])
+                        else:
+                            # Local file
+                            func_file = Path.cwd() / f"{fname}.py"
+                            if func_file.exists():
+                                spec = importlib.util.spec_from_file_location(fname, func_file)
+                                module = importlib.util.module_from_spec(spec)
+                                spec.loader.exec_module(module)
+                                return getattr(module, fname)
+                            raise ImportError(f"Function {fname} not found")
+
+                    try:
+                        func = _load_function(func_name)
+                        series = func(*arg_series)
+                        if not isinstance(series, pd.Series):
+                            series = pd.Series(series)
+                    except Exception as e:
                         print(
-                            f"Warning: Unsupported function {func_name} or wrong args for {target_col}"
+                            f"Warning: Failed to execute function {func_name} for {target_col}: {e}"
                         )
                         series = pd.Series([None] * len(pivoted))
 
@@ -383,6 +429,20 @@ class GeneralProcessor:
                 )
                 if prefix:
                     series = prefix + series.astype(str)
+
+                # Apply Case
+                string_case = (
+                    col_config.get("case") if isinstance(col_config, dict) else None
+                )
+                if string_case and series is not None:
+                    # mask missing values so they stay missing instead of becoming "nan"
+                    mask = series.notna()
+                    if string_case == "upper":
+                        series.loc[mask] = series.loc[mask].astype(str).str.upper()
+                    elif string_case == "lower":
+                        series.loc[mask] = series.loc[mask].astype(str).str.lower()
+                    elif string_case == "title":
+                        series.loc[mask] = series.loc[mask].astype(str).str.title()
 
                 # Apply Type Conversion
                 if target_type:

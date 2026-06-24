@@ -86,6 +86,8 @@ def process_domain(domain_name, sources, df_long, default_keys, output_dir, cust
         group_cols = col_config.get("group")
         sort_cols = col_config.get("sort_by")
 
+        order_cfg = col_config.get("order")
+
         if not isinstance(group_cols, list):
             group_cols = [group_cols]
 
@@ -99,6 +101,9 @@ def process_domain(domain_name, sources, df_long, default_keys, output_dir, cust
         # Create sort view
         temp_df = combined_df[group_cols].copy()
         sort_keys = group_cols[:]
+        
+        # Determine sorting order (ascending by default)
+        ascending_list = [True] * len(group_cols)
 
         if sort_cols:
             if not isinstance(sort_cols, list):
@@ -108,11 +113,25 @@ def process_domain(domain_name, sources, df_long, default_keys, output_dir, cust
                 for c in sort_cols:
                     temp_df[c] = combined_df[c]
                 sort_keys.extend(sort_cols)
+                
+                # Apply custom order if provided
+                if order_cfg:
+                    if not isinstance(order_cfg, list):
+                        order_cfg = [order_cfg]
+                    
+                    # Map "asc"/"desc" to True/False for the sort_cols
+                    for o in order_cfg:
+                        if str(o).lower() in ["desc", "descending", "false"]:
+                            ascending_list.append(False)
+                        else:
+                            ascending_list.append(True)
+                else:
+                    ascending_list.extend([True] * len(sort_cols))
 
         # Sort
-        temp_df = temp_df.sort_values(by=sort_keys)
+        temp_df = temp_df.sort_values(by=sort_keys, ascending=ascending_list)
         # Cumcount + 1
-        seq_series = temp_df.groupby(group_cols).cumcount() + 1
+        seq_series = temp_df.groupby(group_cols, sort=False).cumcount() + 1
         # Re-align to combined_df index
         combined_df[target_col] = seq_series.sort_index()
 
@@ -120,6 +139,6 @@ def process_domain(domain_name, sources, df_long, default_keys, output_dir, cust
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    output_path = os.path.join(output_dir, f"{domain_name}.parquet")
+    output_path = os.path.join(output_dir, f"{domain_name.lower()}.parquet")
     combined_df.to_parquet(output_path, index=False)
     print(f"Saved {domain_name} to {output_path} (Shape: {combined_df.shape})")
