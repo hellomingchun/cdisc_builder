@@ -47,6 +47,8 @@ def _build_supp_dataset(domain_name, parent_df, supp_config):
 
     resolved_qnam_cols = []
     qlabel_map = {}
+    qorig_map = {}
+    qeval_map = {}
 
     for qnam, qcfg in supp_columns.items():
         if isinstance(qcfg, str):
@@ -54,6 +56,9 @@ def _build_supp_dataset(domain_name, parent_df, supp_config):
 
         label = qcfg.get("label", qnam)
         qlabel_map[qnam] = label
+        
+        qorig_map[qnam] = qcfg.get("qorig", qorig)
+        qeval_map[qnam] = qcfg.get("qeval", qeval)
 
         # Resolve qualifier value
         if qnam in parent_df.columns:
@@ -103,8 +108,8 @@ def _build_supp_dataset(domain_name, parent_df, supp_config):
             "QNAM": supp_tall["QNAM"].values,
             "QLABEL": supp_tall["QNAM"].map(qlabel_map).values,
             "QVAL": supp_tall["QVAL"].astype(str).values,
-            "QORIG": qorig,
-            "QEVAL": qeval,
+            "QORIG": supp_tall["QNAM"].map(qorig_map).values,
+            "QEVAL": supp_tall["QNAM"].map(qeval_map).values,
         }
     )
 
