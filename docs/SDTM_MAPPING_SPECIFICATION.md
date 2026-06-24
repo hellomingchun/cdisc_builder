@@ -126,7 +126,7 @@ For each column in `columns`, the configuration can be a simple string (assumed 
 | :--- | :--- | :--- |
 | `source` | `str` | The pivoted column (either an `ItemOID` like `I_1DEMO_PTSEXEL` or a metadata key like `SubjectKey`) to extract the value from. |
 | `literal` | `str\|int\|float\|bool` | A hardcoded value assigned to every row in the block. |
-| `type` | `str` | Casts the output column to a specific type. Options: `str`, `int`, `float`, `bool`, `date` (formats inputs to `YYYY-MM-DD` strings). |
+| `type` | `str` | Casts the output column to a specific type. Options: `str`, `int`, `float`, `bool`, `date` (formats inputs to `YYYY-MM-DD` strings), `iso8601` (formats partial clinical dates following ISO 8601 truncation rules, e.g., `UN-MAY-2026` -> `2026-05`). |
 | `label` | `str` | Optional column description. |
 | `prefix` | `str` | Prepend a static prefix to the value (e.g. `prefix: "CART-"`). *Note: `suffix` is not supported.* |
 | `substring_start` | `int` | The 0-based index to start extracting characters from the source value. |
@@ -311,3 +311,91 @@ VS:
         type: "int"
         label: "Sequence Number"
 ```
+
+---
+
+## 6. Supplemental Qualifier Domains (SUPP--)
+
+Supplemental Qualifier datasets (`SUPP--`) contain additional variables that don't fit in the standard domain structure. The engine supports declaring these qualifiers directly inside the parent domain's YAML configuration and automatically transposing them into the standard CDISC SUPP-- tall format.
+
+### How It Works
+
+1. Map the qualifier columns as regular columns in the parent domain block.
+2. Add a `supp` block as a list item alongside the regular blocks.
+3. The engine builds the parent domain first, then transposes the declared qualifier columns into the SUPP-- structure.
+4. Non-blank qualifier values are kept; rows with null or whitespace-only `QVAL` are dropped.
+5. Qualifier columns are **automatically stripped** from the parent domain output.
+6. The SUPP-- dataset is saved as `supp{domain}.parquet` (e.g., `suppae.parquet`).
+
+### SUPP-- Output Schema
+
+| Column | Type | Description | Auto-Resolved |
+| :--- | :--- | :--- | :--- |
+| `STUDYID` | `str` | Study Identifier | ✅ From parent `STUDYID` column |
+| `RDOMAIN` | `str` | Related Domain Abbreviation (e.g., `AE`) | ✅ From parent domain name |
+| `USUBJID` | `str` | Unique Subject Identifier | ✅ From parent `USUBJID` column |
+| `IDVAR` | `str` | Identifying Variable (e.g., `AESEQ`) | ✅ From `idvar` config |
+| `IDVARVAL` | `str` | Value of the identifying variable | ✅ From parent row |
+| `QNAM` | `str` | Qualifier Variable Name | ✅ From column key |
+| `QLABEL` | `str` | Qualifier Variable Label | ✅ From `label` property |
+| `QVAL` | `str` | Qualifier Value | ✅ From parent column value |
+| `QORIG` | `str` | Origin of the data | ✅ From `qorig` config (default: `CRF`) |
+| `QEVAL` | `str` | Evaluator | ✅ From `qeval` config (default: `""`) |
+
+### SUPP Block Configuration
+
+The `supp` block is declared as a list item alongside regular domain blocks:
+
+| Key | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `idvar` | `str` | **Yes** | The sequence variable that links SUPP rows to the parent (e.g., `AESEQ`). |
+| `studyid` | `str` | No | Column name for STUDYID in the parent. Defaults to `STUDYID`. |
+| `usubjid` | `str` | No | Column name for USUBJID in the parent. Defaults to `USUBJID`. |
+| `qorig` | `str` | No | Data origin value. Defaults to `CRF`. |
+| `qeval` | `str` | No | Evaluator value. Defaults to empty string. |
+| `columns` | `dict` | **Yes** | Dictionary of qualifier columns. Each key is the `QNAM`, and the value supports `label`, `source`, and `literal`. |
+
+### Example: Adverse Events with SUPPAE
+
+```yaml
+AE:
+  # Main AE block
+  - type: events
+    formoid: "F_AE"
+    columns:
+      STUDYID:
+        source: "StudyOID"
+        type: "str"
+      USUBJID:
+        source: "SubjectKey"
+        prefix: "CART-"
+        type: "str"
+      AESEQ:
+        group: ["USUBJID"]
+        sort_by: ["AESTDTC"]
+        type: "int"
+      AETERM:
+        source: "I_AE_TERM"
+        type: "str"
+      AESTDTC:
+        source: "I_AE_STDT"
+        type: "date"
+      # Qualifier columns — mapped here, transposed into SUPPAE
+      AEACNDEV:
+        source: "I_AE_ACNDEV"
+        type: "str"
+      AEGRPID:
+        source: "I_AE_GRPID"
+        type: "str"
+
+  # SUPP block — declares which columns become SUPPAE
+  - supp:
+      idvar: "AESEQ"
+      qorig: "CRF"
+      columns:
+        AEACNDEV:
+          label: "Action Taken with Device"
+        AEGRPID:
+          label: "Group Identifier"
+```
+

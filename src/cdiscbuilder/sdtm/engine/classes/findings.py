@@ -10,7 +10,7 @@ class FindingsProcessor:
     def __init__(self):
         self.class_name = "FINDINGS"
 
-    def process(self, domain_name, sources, df_long, default_keys, custom_to_standard=None):
+    def process(self, domain_name, sources, df_long, default_keys, custom_to_standard=None, built_domains=None):
         domain_dfs = []
 
         for settings in sources:

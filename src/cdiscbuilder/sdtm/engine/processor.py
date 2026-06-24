@@ -8,17 +8,133 @@ from .classes.findings import FindingsProcessor
 from .classes.special_purpose import SpecialPurposeProcessor
 
 
-def process_domain(domain_name, sources, df_long, default_keys, output_dir, custom_to_standard=None):
+def _build_supp_dataset(domain_name, parent_df, supp_config):
+    """
+    Transpose supplemental qualifier columns from the parent domain into SUPP-- format.
+
+    Args:
+        domain_name: Parent domain abbreviation (e.g., "AE").
+        parent_df: The fully-built parent domain DataFrame.
+        supp_config: The 'supp' configuration dict from the YAML.
+
+    Returns:
+        A DataFrame in the standard SUPP-- tall structure, or None if no data.
+    """
+    idvar = supp_config.get("idvar")
+    if not idvar:
+        print(f"Warning: SUPP{domain_name} config missing required 'idvar'. Skipping.")
+        return None
+
+    studyid_col = supp_config.get("studyid", "STUDYID")
+    usubjid_col = supp_config.get("usubjid", "USUBJID")
+    qorig = supp_config.get("qorig", "CRF")
+    qeval = supp_config.get("qeval", "")
+
+    supp_columns = supp_config.get("columns", {})
+    if not supp_columns:
+        print(f"Warning: SUPP{domain_name} config has no columns defined. Skipping.")
+        return None
+
+    # Validate that required ID columns exist in the parent
+    for required_col, col_label in [(studyid_col, "studyid"), (usubjid_col, "usubjid"), (idvar, "idvar")]:
+        if required_col not in parent_df.columns:
+            print(f"Warning: SUPP{domain_name} requires '{required_col}' ({col_label}) but it is missing from parent domain. Skipping.")
+            return None
+
+    # Build the qualifier DataFrame from parent columns
+    id_cols = [studyid_col, usubjid_col, idvar]
+    qual_df = parent_df[id_cols].copy()
+
+    resolved_qnam_cols = []
+    qlabel_map = {}
+
+    for qnam, qcfg in supp_columns.items():
+        if isinstance(qcfg, str):
+            qcfg = {"source": qcfg}
+
+        label = qcfg.get("label", qnam)
+        qlabel_map[qnam] = label
+
+        # Resolve qualifier value
+        if qnam in parent_df.columns:
+            # Column already mapped in parent domain
+            qual_df[qnam] = parent_df[qnam]
+            resolved_qnam_cols.append(qnam)
+        else:
+            source_col = qcfg.get("source")
+            literal_val = qcfg.get("literal")
+
+            if source_col and source_col in parent_df.columns:
+                qual_df[qnam] = parent_df[source_col]
+                resolved_qnam_cols.append(qnam)
+            elif literal_val is not None:
+                qual_df[qnam] = literal_val
+                resolved_qnam_cols.append(qnam)
+            else:
+                print(f"Warning: SUPP{domain_name}.{qnam} could not be resolved from parent domain. Skipping this qualifier.")
+
+    if not resolved_qnam_cols:
+        print(f"Warning: No qualifier columns could be resolved for SUPP{domain_name}. Skipping.")
+        return None
+
+    # Melt qualifier columns into tall format
+    supp_tall = qual_df.melt(
+        id_vars=id_cols,
+        value_vars=resolved_qnam_cols,
+        var_name="QNAM",
+        value_name="QVAL",
+    )
+
+    # Drop rows where QVAL is blank/null
+    supp_tall = supp_tall.dropna(subset=["QVAL"])
+    supp_tall = supp_tall[supp_tall["QVAL"].astype(str).str.strip() != ""]
+
+    if supp_tall.empty:
+        return None
+
+    # Assemble final SUPP-- structure
+    result = pd.DataFrame(
+        {
+            "STUDYID": supp_tall[studyid_col].values,
+            "RDOMAIN": domain_name.upper(),
+            "USUBJID": supp_tall[usubjid_col].values,
+            "IDVAR": idvar,
+            "IDVARVAL": supp_tall[idvar].astype(str).values,
+            "QNAM": supp_tall["QNAM"].values,
+            "QLABEL": supp_tall["QNAM"].map(qlabel_map).values,
+            "QVAL": supp_tall["QVAL"].astype(str).values,
+            "QORIG": qorig,
+            "QEVAL": qeval,
+        }
+    )
+
+    return result
+
+
+def process_domain(domain_name, sources, df_long, default_keys, output_dir, custom_to_standard=None, built_domains=None):
     # Normalize to list
     if isinstance(sources, dict):
         sources = [sources]
 
     if not sources:
         print(f"Warning: No configuration found for {domain_name}")
-        return
+        return None
+
+    # Separate SUPP blocks from regular source blocks
+    supp_config = None
+    regular_sources = []
+    for s in sources:
+        if "supp" in s:
+            supp_config = s["supp"]
+        else:
+            regular_sources.append(s)
+
+    if not regular_sources:
+        print(f"Warning: No configuration found for {domain_name}")
+        return None
 
     # Check type of first source to decide processor
-    p_type = sources[0].get("type", "general").lower() if sources else "general"
+    p_type = regular_sources[0].get("type", "general").lower() if regular_sources else "general"
 
     if p_type == "interventions":
         processor = InterventionsProcessor()
@@ -31,15 +147,15 @@ def process_domain(domain_name, sources, df_long, default_keys, output_dir, cust
     else:
         processor = GeneralProcessor()
 
-    domain_dfs = processor.process(domain_name, sources, df_long, default_keys, custom_to_standard=custom_to_standard)
+    domain_dfs = processor.process(domain_name, regular_sources, df_long, default_keys, custom_to_standard=custom_to_standard, built_domains=built_domains)
 
     if not domain_dfs:
         print(f"Warning: No data found for domain {domain_name}")
-        return
+        return None
 
     # Concatenate or Merge sources
     if not domain_dfs:
-        return
+        return None
 
     combined_df = domain_dfs[0]
 
@@ -76,7 +192,7 @@ def process_domain(domain_name, sources, df_long, default_keys, output_dir, cust
     # Global Sequence Generation (Post-Process)
     # Scan all sources for columns with 'group' attribute
     seq_configs = {}
-    for source in sources:
+    for source in regular_sources:
         mappings = source.get("columns", {})
         for col_name, col_cfg in mappings.items():
             if isinstance(col_cfg, dict) and col_cfg.get("group"):
@@ -135,6 +251,24 @@ def process_domain(domain_name, sources, df_long, default_keys, output_dir, cust
         # Re-align to combined_df index
         combined_df[target_col] = seq_series.sort_index()
 
+    # SUPP-- Domain Generation (Post-Process)
+    if supp_config:
+        supp_df = _build_supp_dataset(domain_name, combined_df, supp_config)
+
+        if supp_df is not None:
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+
+            supp_path = os.path.join(output_dir, f"supp{domain_name.lower()}.parquet")
+            supp_df.to_parquet(supp_path, index=False)
+            print(f"Saved SUPP{domain_name} to {supp_path} (Shape: {supp_df.shape})")
+
+        # Strip qualifier columns from parent output
+        supp_col_names = list(supp_config.get("columns", {}).keys())
+        cols_to_drop = [c for c in supp_col_names if c in combined_df.columns]
+        if cols_to_drop:
+            combined_df.drop(columns=cols_to_drop, inplace=True)
+
     # Save to Parquet
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -142,3 +276,5 @@ def process_domain(domain_name, sources, df_long, default_keys, output_dir, cust
     output_path = os.path.join(output_dir, f"{domain_name.lower()}.parquet")
     combined_df.to_parquet(output_path, index=False)
     print(f"Saved {domain_name} to {output_path} (Shape: {combined_df.shape})")
+
+    return combined_df

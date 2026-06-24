@@ -6,6 +6,10 @@ Maps short function names to full module paths for cleaner specifications.
 from .get_bmi import get_bmi
 from .calculate_study_day import calculate_study_day
 from .extract_value import extract_value
+from .get_dose_dates import get_first_dose_date, get_last_dose_date
+from .coalesce import coalesce
+from .get_last_participation_date import get_last_participation_date
+from .get_earliest_informed_consent_date import get_earliest_informed_consent_date
 
 # Function registry mapping short names to full paths
 FUNCTION_REGISTRY = {
@@ -15,6 +19,11 @@ FUNCTION_REGISTRY = {
     # SDTM functions
     "calculate_study_day": "cdiscbuilder.functions.calculate_study_day.calculate_study_day",
     "extract_value": "cdiscbuilder.functions.extract_value.extract_value",
+    "get_first_dose_date": "cdiscbuilder.functions.get_dose_dates.get_first_dose_date",
+    "get_last_dose_date": "cdiscbuilder.functions.get_dose_dates.get_last_dose_date",
+    "coalesce": "cdiscbuilder.functions.coalesce.coalesce",
+    "get_last_participation_date": "cdiscbuilder.functions.get_last_participation_date.get_last_participation_date",
+    "get_earliest_informed_consent_date": "cdiscbuilder.functions.get_earliest_informed_consent_date.get_earliest_informed_consent_date",
 }
 
 
@@ -61,6 +70,11 @@ __all__ = [
     "get_bmi",
     "calculate_study_day",
     "extract_value",
+    "get_first_dose_date",
+    "get_last_dose_date",
+    "coalesce",
+    "get_last_participation_date",
+    "get_earliest_informed_consent_date",
     "get_function_path",
     "list_available_functions",
     "register_function",

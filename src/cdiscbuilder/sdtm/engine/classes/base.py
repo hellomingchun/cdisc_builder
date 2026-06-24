@@ -7,7 +7,7 @@ class BaseProcessor(ABC):
         self.class_name = "GENERAL"
 
     @abstractmethod
-    def process(self, domain_name, sources, df_long, default_keys):
+    def process(self, domain_name, sources, df_long, default_keys, built_domains=None):
         """Main entry point for processing a domain."""
         pass
 
@@ -55,6 +55,9 @@ class BaseProcessor(ABC):
                     series = pd.to_datetime(
                         series, errors="coerce", format="mixed"
                     ).dt.strftime("%Y-%m-%d")
+                elif target_type == "iso8601":
+                    from cdiscbuilder.sdtm.engine.utils.iso8601 import parse_iso8601
+                    series = series.apply(parse_iso8601)
                 elif target_type == "str":
                     series = series.astype(str).replace("nan", None)
             except Exception as e:

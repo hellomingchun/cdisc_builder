@@ -1,0 +1,92 @@
+version: "1.0"
+definitions:
+  column_general:
+    type: dict
+    properties:
+      # Build Execution Properties
+      source: {type: str}
+      literal: {type: [str, int, float, bool]}
+      type: {type: str, enum: [str, int, float, bool, iso8601, datetime]}
+      function: {type: str}
+      args: {type: list}
+      kwargs: {type: dict}
+      max_missing_pct: {type: [int, float]}
+      value_mapping: {type: dict}
+      conditions: {type: list}
+      case_sensitive: {type: bool}
+      prefix: {type: str}
+      substring_start: {type: int}
+      substring_length: {type: int}
+      mapping_default: {type: [str, int, float, bool]}
+      mapping_default_source: {type: str}
+      fallback: {type: str}
+      group: {type: list}
+      sort_by: {type: list}
+      dependency: {type: str}
+      dependency_false_value: {type: [str, int, float, bool]}
+      regex_extract: {type: str}
+      
+      # Structural Metadata Properties
+      label: {type: str}
+      core: {type: str, enum: ["Req", "Exp", "Perm"]}
+      origin: {type: str}
+      comments: {type: str}
+      conversion: {type: str}
+
+  column_findings:
+    type: dict
+    required: [name]
+    properties:
+      name: {type: str}
+      # Build Execution Properties
+      type: {type: str}
+      literal: {type: [str, int, float, bool]}
+      source: {type: str}
+      function: {type: str}
+      args: {type: list}
+      kwargs: {type: dict}
+      formoid: {type: [str, list]}
+      itemoid: {type: [str, list]}
+      value_mapping: {type: dict}
+      conditions: {type: list}
+      case_sensitive: {type: bool}
+      prefix: {type: str}
+      substring_start: {type: int}
+      substring_length: {type: int}
+      mapping_default: {type: [str, int, float, bool]}
+      mapping_default_source: {type: str}
+      group: {type: list}
+      sort_by: {type: list}
+      
+      # Structural Metadata Properties
+      label: {type: str}
+      core: {type: str, enum: ["Req", "Exp", "Perm"]}
+      origin: {type: str}
+      comments: {type: str}
+      conversion: {type: str}
+
+schemas:
+  general_domain:
+    type: list
+    item_schema:
+      type: dict
+      required: [formoid, columns]
+      properties:
+        type: {type: str, enum: ["general", "findings"]}
+        item_group_regex: {type: str}
+        item_oid_regex: {type: str}
+        formoid: {type: [str, list]}
+        keys: {type: list}
+        columns:
+          type: dict
+          values_schema: {ref: column_general}
+
+  findings_domain:
+    type: dict
+    required: [type, columns]
+    properties:
+      type: {const: FINDINGS}
+      definitions: {type: dict} # YAML Anchors container
+      columns:
+        type: list
+        item_schema: {ref: column_findings}

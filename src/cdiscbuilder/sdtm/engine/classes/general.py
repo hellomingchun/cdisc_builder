@@ -59,7 +59,54 @@ class GeneralProcessor:
 
         return expanded_list
 
-    def process(self, domain_name, sources, df_long, default_keys, custom_to_standard=None):
+    def _resolve_cross_domain(self, source_expr, col_config, final_df, pivoted, built_domains):
+        """
+        Resolve a cross-domain reference (e.g., 'DM.RFSTDTC') by merging from built_domains.
+        Returns (series, resolved) where resolved is True if successfully resolved.
+        """
+        if not (isinstance(source_expr, str) and "." in source_expr):
+            return None, False
+
+        ref_domain, ref_col = source_expr.split(".", 1)
+        if not (ref_domain.isupper() and 2 <= len(ref_domain) <= 4):
+            return None, False
+
+        if not built_domains or ref_domain not in built_domains:
+            print(f"Warning: Referenced domain '{ref_domain}' not available for cross-domain ref '{source_expr}'")
+            return pd.Series([None] * len(pivoted)), True
+
+        ref_df = built_domains[ref_domain]
+        if ref_col not in ref_df.columns:
+            print(f"Warning: Column '{ref_col}' not found in domain '{ref_domain}' for cross-domain ref '{source_expr}'")
+            return pd.Series([None] * len(pivoted)), True
+
+        # Determine merge key
+        merge_key = col_config.get("merge_on", ["USUBJID"]) if isinstance(col_config, dict) else ["USUBJID"]
+        if isinstance(merge_key, str):
+            merge_key = [merge_key]
+
+        # Validate merge keys exist in both DataFrames
+        valid_keys = [k for k in merge_key if k in final_df.columns and k in ref_df.columns]
+
+        if not valid_keys:
+            print(f"Warning: Merge keys {merge_key} missing for cross-domain ref '{source_expr}'")
+            return pd.Series([None] * len(pivoted)), True
+
+        # Get unique ref values to avoid duplicating rows
+        ref_cols_needed = valid_keys + [ref_col]
+        ref_subset = ref_df[ref_cols_needed].drop_duplicates(subset=valid_keys)
+
+        # Merge into final_df temporarily
+        merged = final_df[valid_keys].merge(ref_subset, on=valid_keys, how="left")
+        series = merged[ref_col]
+        series.index = final_df.index  # Re-align index
+
+        match_count = series.notna().sum()
+        print(f"  ↳ Resolved cross-domain ref: {source_expr} ({match_count} matches via {valid_keys})")
+
+        return series, True
+
+    def process(self, domain_name, sources, df_long, default_keys, custom_to_standard=None, built_domains=None):
         domain_dfs = []
 
         # Pre-expand sources if they contain lists
@@ -214,35 +261,27 @@ class GeneralProcessor:
                 elif isinstance(col_config, dict) and col_config.get("function"):
                     func_name = col_config.get("function")
                     args = col_config.get("args", [])
+                    kwargs = col_config.get("kwargs", {})
 
                     # Resolve Args
                     arg_series = []
                     for arg in args:
-                        # Support cross-domain lookup? For now support local columns in final_df or pivoted
+                        # Support cross-domain lookup
                         if arg in final_df.columns:
                             arg_series.append(final_df[arg])
                         elif arg in pivoted.columns:
                             arg_series.append(pivoted[arg])
                         else:
-                            # Try loading from DM if it looks like DM.RFSTDTC
+                            # Try cross-domain resolution
                             if isinstance(arg, str) and "." in arg:
-                                dname, vname = arg.split(".")
-                                # Only DM supported for now as reference
-                                if dname == "DM":
-
-                                    # Locate output_dir? (We don't have output_dir here easily)
-                                    # For now, let's assume RFSTDTC was merged into DM block or AE block already
-                                    # Or we pass it in.
-                                    # For the demo, let's assume RFSTDTC is in the dataset or handled as a string
-                                    print(
-                                        f"Warning: Cross-domain arg {arg} resolution not fully implemented in GeneralProcessor"
-                                    )
-                                    arg_series.append(pd.Series([None] * len(pivoted)))
+                                cross_series, resolved = self._resolve_cross_domain(
+                                    arg, {}, final_df, pivoted, built_domains
+                                )
+                                if resolved and cross_series is not None:
+                                    arg_series.append(cross_series)
                                 else:
                                     arg_series.append(pd.Series([None] * len(pivoted)))
                             else:
-                                # Not found locally, and not a string with a dot. Treat as a literal or unresolved?
-                                # Wait, ADaM's args might be string constants. Let's just append None for now as before.
                                 arg_series.append(pd.Series([None] * len(pivoted)))
 
                     import importlib
@@ -272,8 +311,18 @@ class GeneralProcessor:
                             raise ImportError(f"Function {fname} not found")
 
                     try:
+                        import inspect
                         func = _load_function(func_name)
-                        series = func(*arg_series)
+                        sig = inspect.signature(func)
+                        
+                        func_kwargs = kwargs.copy()
+                        if "built_domains" in sig.parameters:
+                            func_kwargs["built_domains"] = built_domains
+                        if "df_long" in sig.parameters:
+                            func_kwargs["df_long"] = df_long
+                            
+                        series = func(*arg_series, **func_kwargs)
+                            
                         if not isinstance(series, pd.Series):
                             series = pd.Series(series)
                     except Exception as e:
@@ -282,11 +331,49 @@ class GeneralProcessor:
                         )
                         series = pd.Series([None] * len(pivoted))
 
+                elif isinstance(col_config, dict) and col_config.get("conditions"):
+                    import numpy as np
+                    conditions_config = col_config.get("conditions")
+                    
+                    # Create an evaluation context combining raw domain data and current final_df
+                    eval_df = pivoted.copy()
+                    for c in final_df.columns:
+                        eval_df[c] = final_df[c]
+                        
+                    cond_list = []
+                    choice_list = []
+                    
+                    for cond in conditions_config:
+                        expr = cond.get("if")
+                        then_val = cond.get("then")
+                        try:
+                            # Evaluate condition string
+                            mask = eval_df.eval(expr)
+                            cond_list.append(mask)
+                            choice_list.append(then_val)
+                        except Exception as e:
+                            print(f"Warning: Failed to evaluate condition '{expr}': {e}")
+                            cond_list.append(pd.Series(False, index=eval_df.index))
+                            choice_list.append(then_val)
+                            
+                    default_val = col_config.get("default", None)
+                    if cond_list:
+                        # np.select evaluates conditions in order
+                        series = pd.Series(np.select(cond_list, choice_list, default=default_val), index=eval_df.index)
+                    else:
+                        series = pd.Series([default_val] * len(eval_df), index=eval_df.index)
+
                 elif literal_expr is not None:
                     # Explicit literal value
                     series = pd.Series([literal_expr] * len(pivoted))
                 elif source_expr:
-                    if source_expr in pivoted.columns:
+                    # Check for cross-domain reference first
+                    cross_series, resolved = self._resolve_cross_domain(
+                        source_expr, col_config, final_df, pivoted, built_domains
+                    )
+                    if resolved:
+                        series = cross_series
+                    elif source_expr in pivoted.columns:
                         series = pivoted[source_expr].copy()
                     elif source_expr in final_df.columns:
                         series = final_df[source_expr].copy()

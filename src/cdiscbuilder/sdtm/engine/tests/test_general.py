@@ -112,4 +112,50 @@ def test_general_processor_grouping():
     result_df = dfs[0]
     # Check that sequence sorting worked correctly
     assert list(result_df["USUBJID"]) == ["001", "001", "001", "002"]
-    assert list(result_df["TRTSEQ"]) == [1, 2, 3, 1]
+    assert len(dfs) == 1
+    assert list(dfs[0]["TRTSEQ"]) == [1, 2, 3, 1]
+
+
+def test_general_processor_conditions():
+    processor = GeneralProcessor()
+    
+    df_long = pd.DataFrame(
+        {
+            "SubjectKey": ["001", "002", "003", "004"],
+            "FormOID": ["F_DM", "F_DM", "F_DM", "F_DM"],
+            "ItemOID": ["AGE", "AGE", "AGE", "AGE"],
+            "Value": ["15", "30", "70", "UNKNOWN_AGE"],
+        }
+    )
+
+    sources = [
+        {
+            "formoid": "F_DM",
+            "columns": {
+                "USUBJID": {"source": "SubjectKey"},
+                "AGE": {"source": "AGE"},  # AGE will be mapped as strings initially, wait pd.eval needs numeric if we use < 18
+                "AGE_NUM": {
+                    "source": "AGE",
+                    "type": "float"  # Force conversion to numeric so we can do math
+                },
+                "AGEGR1": {
+                    "conditions": [
+                        {"if": "AGE_NUM < 18", "then": "<18"},
+                        {"if": "AGE_NUM >= 18 and AGE_NUM <= 65", "then": "18-65"},
+                        {"if": "AGE_NUM > 65", "then": ">65"}
+                    ],
+                    "default": "UNKNOWN"
+                }
+            },
+        }
+    ]
+
+    dfs = processor.process("DM", sources, df_long, ["SubjectKey"])
+    result_df = dfs[0]
+
+    assert "AGEGR1" in result_df.columns
+    # 001 -> 15 (<18)
+    # 002 -> 30 (18-65)
+    # 003 -> 70 (>65)
+    # 004 -> UNKNOWN_AGE (NaN for AGE_NUM, evaluates to false, default UNKNOWN)
+    assert list(result_df["AGEGR1"]) == ["<18", "18-65", ">65", "UNKNOWN"]
