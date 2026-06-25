@@ -2,10 +2,75 @@ import pandas as pd
 
 
 class GeneralProcessor:
+    def __init__(self):
+        self._ct_cache = {}
+
+    def _load_value_mapping(self, mapping_ref):
+        import yaml
+        import json
+        from pathlib import Path
+
+        parts = mapping_ref.split(":", 1)
+        filepath = parts[0]
+        key = parts[1] if len(parts) > 1 else None
+
+        if filepath not in self._ct_cache:
+            path = Path(filepath)
+            if not path.is_absolute():
+                path = Path.cwd() / filepath
+            
+            if not path.exists():
+                print(f"Warning: value_mapping_from file {filepath} not found.")
+                self._ct_cache[filepath] = {}
+            else:
+                try:
+                    with open(path, "r") as f:
+                        if filepath.endswith(".json"):
+                            self._ct_cache[filepath] = json.load(f)
+                        else:
+                            self._ct_cache[filepath] = yaml.safe_load(f)
+                except Exception as e:
+                    print(f"Warning: Failed to load {filepath}: {e}")
+                    self._ct_cache[filepath] = {}
+
+        data = self._ct_cache[filepath]
+        if key:
+            return data.get(key)
+        return data
     def _expand_settings(self, settings):
         """
-        Expands a settings dict with list-based sources/literals into multiple settings dicts.
+        Expands a settings dict into multiple settings dicts based on `observations` list or list-based sources/literals.
         """
+        observations = settings.get("observations")
+        if observations and isinstance(observations, list):
+            expanded_list = []
+            base_columns = settings.get("columns", {})
+            for obs in observations:
+                new_settings = settings.copy()
+                new_cols = {}
+                # deep copy base columns to avoid mutating
+                for k, v in base_columns.items():
+                    if isinstance(v, dict):
+                        new_cols[k] = v.copy()
+                    else:
+                        new_cols[k] = v
+                
+                # Merge observation-specific column overrides
+                for col_name, col_cfg in obs.items():
+                    if isinstance(col_cfg, dict):
+                        if col_name in new_cols and isinstance(new_cols[col_name], dict):
+                            new_cols[col_name].update(col_cfg)
+                        else:
+                            new_cols[col_name] = col_cfg.copy()
+                    else:
+                        new_cols[col_name] = col_cfg
+
+                new_settings["columns"] = new_cols
+                new_settings.pop("observations", None)
+                expanded_list.append(new_settings)
+            
+            return expanded_list
+
         # Find all columns that have a list for source or literal
         list_cols = {}
         list_len = 0
@@ -73,12 +138,12 @@ class GeneralProcessor:
 
         if not built_domains or ref_domain not in built_domains:
             print(f"Warning: Referenced domain '{ref_domain}' not available for cross-domain ref '{source_expr}'")
-            return pd.Series([None] * len(pivoted)), True
+            return pd.Series([None] * len(pivoted), index=final_df.index), True
 
         ref_df = built_domains[ref_domain]
         if ref_col not in ref_df.columns:
             print(f"Warning: Column '{ref_col}' not found in domain '{ref_domain}' for cross-domain ref '{source_expr}'")
-            return pd.Series([None] * len(pivoted)), True
+            return pd.Series([None] * len(pivoted), index=final_df.index), True
 
         # Determine merge key
         merge_key = col_config.get("merge_on", ["USUBJID"]) if isinstance(col_config, dict) else ["USUBJID"]
@@ -90,7 +155,7 @@ class GeneralProcessor:
 
         if not valid_keys:
             print(f"Warning: Merge keys {merge_key} missing for cross-domain ref '{source_expr}'")
-            return pd.Series([None] * len(pivoted)), True
+            return pd.Series([None] * len(pivoted), index=final_df.index), True
 
         # Get unique ref values to avoid duplicating rows
         ref_cols_needed = valid_keys + [ref_col]
@@ -181,6 +246,9 @@ class GeneralProcessor:
                     value_map = col_config.get("value_mapping") or col_config.get(
                         "mapping_value"
                     )
+                    value_mapping_from = col_config.get("value_mapping_from")
+                    if not value_map and value_mapping_from:
+                        value_map = self._load_value_mapping(value_mapping_from)
                     case_sensitive = col_config.get("case_sensitive", True)
                     group_cols = col_config.get("group")
                     sort_cols = col_config.get("sort_by")
@@ -223,31 +291,30 @@ class GeneralProcessor:
                             if not isinstance(sort_cols, list):
                                 sort_cols = [sort_cols]
 
-                            missing_sort = [
-                                c for c in sort_cols if c not in final_df.columns
-                            ]
-                            if missing_sort:
-                                print(
-                                    f"Warning: Sort columns {missing_sort} not found for '{domain_name}.{target_col}'. using partial/no sort."
-                                )
+                            if order_cfg:
+                                if not isinstance(order_cfg, list):
+                                    order_cfg = [order_cfg] * len(sort_cols)
                             else:
-                                for c in sort_cols:
+                                order_cfg = [True] * len(sort_cols)
+
+                            for i, c in enumerate(sort_cols):
+                                found = False
+                                if c in final_df.columns:
                                     temp_df[c] = final_df[c]
-                                sort_keys.extend(sort_cols)
-                                
-                                # Apply custom order if provided
-                                if order_cfg:
-                                    if not isinstance(order_cfg, list):
-                                        order_cfg = [order_cfg]
-                                    
-                                    # Map "asc"/"desc" to True/False for the sort_cols
-                                    for o in order_cfg:
-                                        if str(o).lower() in ["desc", "descending", "false"]:
-                                            ascending_list.append(False)
-                                        else:
-                                            ascending_list.append(True)
+                                    found = True
+                                elif c in pivoted.columns:
+                                    temp_df[c] = pivoted[c]
+                                    found = True
                                 else:
-                                    ascending_list.extend([True] * len(sort_cols))
+                                    print(f"Warning: Sort column '{c}' not found for '{domain_name}.{target_col}'.")
+
+                                if found:
+                                    sort_keys.append(c)
+                                    o = order_cfg[i] if i < len(order_cfg) else True
+                                    if str(o).lower() in ["desc", "descending", "false"]:
+                                        ascending_list.append(False)
+                                    else:
+                                        ascending_list.append(True)
 
                         # Sort
                         temp_df = temp_df.sort_values(by=sort_keys, ascending=ascending_list)

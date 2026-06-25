@@ -116,6 +116,7 @@ Wide domains are structured datasets where each observation is represented in a 
 * **`formoid`** (Required): The Form OID(s) to process. Can be a single string or a list of strings.
 * **`keys`** (Optional): A list of columns to pivot/group on. If omitted, defaults to the keys defined in `defaults.yaml`.
 * **`merge_on`** (Optional): A list of columns. If specified, this block's pivoted data will be left-merged with the previous blocks on these columns. If omitted, blocks are appended (concatenated).
+* **`observations`** (Optional): A list of dictionaries, where each dictionary overrides/supplements the base `columns` to create a separate output row. Ideal for expanding multiple wide sibling fields (like SYSBP and DIABP) into separate rows per test without copying the entire block.
 * **`columns`** (Required): A dictionary mapping target SDTM column names to their mapping configurations.
 
 ### Column Mapping Properties
@@ -133,15 +134,16 @@ For each column in `columns`, the configuration can be a simple string (assumed 
 | `substring_length` | `int` | The number of characters to extract from the source value. |
 | `fallback` | `str` | A column name to read if the primary `source` column contains a null/NaN value. |
 | `value_mapping` | `dict` | Dictionary mapping raw input values to mapped target values (e.g., `{"Male": "M"}`). |
+| `value_mapping_from` | `str` | Path to an external file (YAML or JSON) containing the mapping dictionary (e.g., `ct.yaml:LBTESTCD` to load the `LBTESTCD` key from `ct.yaml`). |
 | `case_sensitive` | `bool` | Default `true`. If set to `false`, `value_mapping` lookup matches case-insensitively. |
 | `mapping_default` | `str\|int\|float\|bool` | Value to assign if the source value is not found in the `value_mapping`. |
 | `mapping_default_source` | `str` | Column name to fallback to if the source value is not found in the `value_mapping`. |
 | `dependency` | `str` | Column name. The mapped value is kept only if the dependency column is not null. |
 | `dependency_false_value` | `any` | Value to assign if the `dependency` column is null. Defaults to null. |
-| `function` | `str` | Function to call. The only supported function is `calculate_study_day`. |
-| `args` | `list` | Arguments to pass to `function`. For `calculate_study_day`, it must be a list of two columns: `[event_date, RFSTDTC]` (e.g., `[AESTDTC, DM.RFSTDTC]`). |
+| `function` | `str` | Name or absolute path of a Python function to call dynamically for value derivation. |
+| `args` | `list` | List of column names or literals to pass as positional arguments to `function`. Supports cross-domain lookups (e.g., `DM.RFSTDTC`). |
 | `group` | `list` | List of columns. Combines with `sort_by` to generate sequential counts starting at 1. Can be used for block-level or global sequencing. |
-| `sort_by` | `list` | List of columns to order the rows by before assigning sequence counts. |
+| `sort_by` | `list` | List of columns to order the rows by before assigning sequence counts. Can reference pre-pivot (source) columns that aren't mapped as output variables. |
 | `order` | `list` | List of strings (`"asc"` or `"desc"`) specifying the sort direction for each column in `sort_by`. |
 | `max_missing_pct` | `float` | Validation threshold. Prints a warning if the percentage of missing values in the final column exceeds this value. |
 
@@ -162,6 +164,7 @@ Findings domains are tall, transactional datasets where each observation represe
 * **`item_group_regex`** (Optional): A regex string to filter the `ItemGroupOID` (e.g. `IG_ELIGI_.*`).
 * **`item_oid_regex`** (Optional): A regex string to filter the `ItemOID` (e.g. `I_KITCH_(HEIGHT\|WEIGHT\|BP_SYS\|BP_DIA\|PULSE).1`).
 * **`keys`** (Optional): List of index columns. Defaults to keys in `defaults.yaml`.
+* **`observations`** (Optional): A list of dictionaries to emit multiple rows per processed group/row by supplementing the `columns` configuration.
 * **`columns`** (Required): A dictionary mapping target SDTM column names to their mapping configurations.
 
 ### Column Mapping Properties
@@ -182,8 +185,11 @@ Supported properties:
 | `prefix` | `str` | Prepend a static prefix to the value (e.g. `prefix: "CART-"`). |
 | `regex_extract` | `str` | A regular expression pattern containing a single capture group. Used to extract a substring from the `source` column (e.g., `I_ELIGI_(.*)` to extract the test code). |
 | `value_mapping` | `dict` | Dictionary mapping raw input values to target values. *Note: Lookup is strictly case-sensitive.* |
+| `value_mapping_from` | `str` | Path to an external file (YAML or JSON) containing the mapping dictionary (e.g., `ct.yaml:VSRESU` to load the `VSRESU` key from `ct.yaml`). |
+| `function` | `str` | Name or absolute path of a Python function to call dynamically for value derivation. |
+| `args` | `list` | List of column names or literals to pass as positional arguments to `function`. Supports cross-domain lookups (e.g., `DM.RFSTDTC`). |
 | `group` | `list` | List of columns. Generates sequential counts starting at 1 (e.g., `group: ["USUBJID"]`). |
-| `sort_by` | `list` | List of columns to order the rows by before assigning sequence counts. |
+| `sort_by` | `list` | List of columns to order the rows by before assigning sequence counts. Can reference pre-pivot (source) columns that aren't mapped as output variables. |
 | `order` | `list` | List of strings (`"asc"` or `"desc"`) specifying the sort direction for each column in `sort_by`. |
 
 ---
@@ -310,6 +316,31 @@ VS:
         sort_by: ["VSDTC", "VSTESTCD"]
         type: "int"
         label: "Sequence Number"
+
+### Wide Domain Findings Example with `observations` (VS.yaml)
+
+When the source has multiple tests grouped into wide siblings, you can use `observations` to emit multiple rows from a single block:
+
+```yaml
+VS:
+  - type: general
+    formoid: "F_VITALS"
+    observations:
+      - VSTESTCD: "SYSBP"
+        VSTEST: "Systolic Blood Pressure"
+        VSORRES: 
+          source: "I_VS_SYS"
+      - VSTESTCD: "DIABP"
+        VSTEST: "Diastolic Blood Pressure"
+        VSORRES: 
+          source: "I_VS_DIA"
+    columns:
+      STUDYID:
+        source: "StudyOID"
+      DOMAIN: "VS"
+      USUBJID:
+        source: "SubjectKey"
+```
 ```
 
 ---
@@ -348,7 +379,7 @@ The `supp` block is declared as a list item alongside regular domain blocks:
 
 | Key | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| `idvar` | `str` | **Yes** | The sequence variable that links SUPP rows to the parent (e.g., `AESEQ`). |
+| `idvar` | `str` | No | The sequence variable that links SUPP rows to the parent (e.g., `AESEQ`). If blank or omitted (for subject-level domains like SUPPDM), the dataset groups only on `USUBJID` and `STUDYID` with a blank `IDVAR`. |
 | `studyid` | `str` | No | Column name for STUDYID in the parent. Defaults to `STUDYID`. |
 | `usubjid` | `str` | No | Column name for USUBJID in the parent. Defaults to `USUBJID`. |
 | `qorig` | `str` | No | Data origin value. Defaults to `CRF`. |

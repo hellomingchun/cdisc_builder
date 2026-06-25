@@ -21,9 +21,6 @@ def _build_supp_dataset(domain_name, parent_df, supp_config):
         A DataFrame in the standard SUPP-- tall structure, or None if no data.
     """
     idvar = supp_config.get("idvar")
-    if not idvar:
-        print(f"Warning: SUPP{domain_name} config missing required 'idvar'. Skipping.")
-        return None
 
     studyid_col = supp_config.get("studyid", "STUDYID")
     usubjid_col = supp_config.get("usubjid", "USUBJID")
@@ -36,13 +33,19 @@ def _build_supp_dataset(domain_name, parent_df, supp_config):
         return None
 
     # Validate that required ID columns exist in the parent
-    for required_col, col_label in [(studyid_col, "studyid"), (usubjid_col, "usubjid"), (idvar, "idvar")]:
+    required_cols = [(studyid_col, "studyid"), (usubjid_col, "usubjid")]
+    if idvar:
+        required_cols.append((idvar, "idvar"))
+        
+    for required_col, col_label in required_cols:
         if required_col not in parent_df.columns:
             print(f"Warning: SUPP{domain_name} requires '{required_col}' ({col_label}) but it is missing from parent domain. Skipping.")
             return None
 
     # Build the qualifier DataFrame from parent columns
-    id_cols = [studyid_col, usubjid_col, idvar]
+    id_cols = [studyid_col, usubjid_col]
+    if idvar:
+        id_cols.append(idvar)
     qual_df = parent_df[id_cols].copy()
 
     resolved_qnam_cols = []
@@ -103,8 +106,8 @@ def _build_supp_dataset(domain_name, parent_df, supp_config):
             "STUDYID": supp_tall[studyid_col].values,
             "RDOMAIN": domain_name.upper(),
             "USUBJID": supp_tall[usubjid_col].values,
-            "IDVAR": idvar,
-            "IDVARVAL": supp_tall[idvar].astype(str).values,
+            "IDVAR": idvar if idvar else "",
+            "IDVARVAL": supp_tall[idvar].astype(str).values if idvar else "",
             "QNAM": supp_tall["QNAM"].values,
             "QLABEL": supp_tall["QNAM"].map(qlabel_map).values,
             "QVAL": supp_tall["QVAL"].astype(str).values,

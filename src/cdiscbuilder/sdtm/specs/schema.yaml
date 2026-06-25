@@ -12,6 +12,7 @@ definitions:
       kwargs: {type: dict}
       max_missing_pct: {type: [int, float]}
       value_mapping: {type: dict}
+      value_mapping_from: {type: str}
       conditions: {type: list}
       case_sensitive: {type: bool}
       prefix: {type: str}
@@ -32,6 +33,12 @@ definitions:
       origin: {type: str}
       comments: {type: str}
       conversion: {type: str}
+      supp:
+        type: dict
+        properties:
+          qlabel: {type: str}
+          qorig: {type: str}
+          qeval: {type: str}
 
   column_findings:
     type: dict
@@ -48,6 +55,7 @@ definitions:
       formoid: {type: [str, list]}
       itemoid: {type: [str, list]}
       value_mapping: {type: dict}
+      value_mapping_from: {type: str}
       conditions: {type: list}
       case_sensitive: {type: bool}
       prefix: {type: str}
@@ -64,6 +72,12 @@ definitions:
       origin: {type: str}
       comments: {type: str}
       conversion: {type: str}
+      supp:
+        type: dict
+        properties:
+          qlabel: {type: str}
+          qorig: {type: str}
+          qeval: {type: str}
 
 schemas:
   general_domain:
@@ -80,6 +94,11 @@ schemas:
         columns:
           type: dict
           values_schema: {ref: column_general}
+        observations:
+          type: list
+          item_schema:
+            type: dict
+            values_schema: {ref: column_general}
 
   findings_domain:
     type: dict
