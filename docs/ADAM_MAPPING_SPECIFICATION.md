@@ -26,7 +26,7 @@ An ADaM YAML configuration contains the following root-level keys:
 | Key | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
 | `domain` | `str` | **Yes** | ADaM dataset domain name. Must match the regex `^AD[A-Z0-9]{0,6}$` (e.g., `ADSL`, `ADAE`). |
-| `dir` | `dict` | **Yes** | Paths to input and output directories (see [Directory Fields](#directory-fields) below). |
+| `dir` | `dict` | **Yes** | Paths to input and output directories (see [Directory Fields](#directory-fields-dir) below). |
 | `schema` | `str` | **Yes** | Relative path to the schema validation file. |
 | `columns` | `list` | **Yes** | List of column mapping specifications. |
 | `key` | `list` | No | List of unique row identifier variables for the dataset (e.g. `[USUBJID]`). Must contain 1 to 5 items. |
@@ -62,7 +62,7 @@ Each item in the `columns` list represents a single column specification.
 ### Required Fields
 * **`name`** (Required): Column name. Must match the regex `^[A-Z][A-Z0-9_]{0,7}$` (uppercase, maximum 8 characters).
 * **`type`** (Required): Output data type. Must be one of: `str`, `int`, `float`, `date`, `datetime`, `bool`.
-* **`derivation`** (Required): Rules for deriving the column values (see [Derivation Types](#derivation-types) below).
+* **`derivation`** (Required): Rules for deriving the column values (see [Derivation Types](#5-derivation-types) below).
 
 ### Optional Fields
 * **`label`** (Optional): A description of the column (max 200 characters). Defaults to the column name if omitted.
@@ -113,14 +113,17 @@ derivation:
     function: last
 ```
 
-#### 3. Value Mapping (`mapping`)
+#### 3. Value Mapping (`mapping`, `value_mapping`, or `mapping_value`)
 Translates source values to target values.
+You can also use `mapping_default` to assign a default value when the source doesn't match any mapping keys, and `case_sensitive: false` for case-insensitive matching.
 ```yaml
 derivation:
   source: DM.SEX
-  mapping:
-    "Male": "M"
-    "Female": "F"
+  value_mapping:
+    "male": "M"
+    "female": "F"
+  mapping_default: "U"
+  case_sensitive: false
 ```
 
 #### 4. String Case Formatting (`case`)

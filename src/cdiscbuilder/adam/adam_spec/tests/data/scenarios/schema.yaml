@@ -92,6 +92,10 @@ column:
     - length
     - format
     - codelist
+    - value_mapping
+    - mapping_value
+    - mapping_default
+    - case_sensitive
     
   fields:
     name:
@@ -132,6 +136,22 @@ column:
       type: bool
       description: "Flag to drop inherited column"
       
+    value_mapping:
+      type: dict
+      description: "Value mapping dictionary"
+      
+    mapping_value:
+      type: dict
+      description: "Alternative value mapping dictionary"
+      
+    mapping_default:
+      type: [str, int, float, bool]
+      description: "Default value if mapping fails"
+      
+    case_sensitive:
+      type: bool
+      description: "Whether mapping should be case sensitive"
+      
     derivation:
       type: dict
       mutually_exclusive: [["constant", "source"], ["constant", "function"], ["constant", "condition"]]
@@ -161,6 +181,18 @@ column:
         mapping:
           type: dict
           description: "Value mapping dictionary"
+        value_mapping:
+          type: dict
+          description: "Value mapping dictionary"
+        mapping_value:
+          type: dict
+          description: "Alternative value mapping dictionary"
+        mapping_default:
+          type: [str, int, float, bool]
+          description: "Default value if mapping fails"
+        case_sensitive:
+          type: bool
+          description: "Whether mapping should be case sensitive"
         cut:
           type: dict
           description: "Categorization rules"
