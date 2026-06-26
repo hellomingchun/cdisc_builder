@@ -1,0 +1,36 @@
+site_name: Ming-Chun | cdisc_builder
+site_description: A Python framework for building CDISC-compliant datasets.
+site_author: Ming-Chun Chen
+
+repo_url: https://github.com/hellomingchun/cdisc_builder
+repo_name: hellomingchun/cdisc_builder
+
+theme:
+  name: material
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - content.code.copy
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/hellomingchun
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/hellomingchun/ 
