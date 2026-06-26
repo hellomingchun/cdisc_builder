@@ -53,8 +53,11 @@ cdisc-sdtm --xml data/openclinica_data.xml --configs sdtm/specs/sample --output 
 Traditional clinical programming relies heavily on imperative languages (like SAS) where logic is deeply embedded in custom scripts. `cdisc_builder` shifts this paradigm by abstracting transformations into a strictly validated, declarative **YAML Domain-Specific Language (DSL)**.
 
 This makes it the perfect companion for AI agents (such as Claude, Gemini, or ChatGPT) to automate mapping tasks:
+
 1. **Schema-Driven Rules**: Because all mappings conform strictly to `schema.yaml`, an AI can easily read the schema documentation and guarantee syntactically correct derivations.
+
 2. **Metadata Summaries**: Raw ODM XML files are often too large for AI context windows. `cdisc_builder` can generate lightweight "Data Dictionaries" (metadata summaries) containing only the essential variable information and sample values, allowing the AI to perfectly understand the source data.
+
 3. **Automated Derivation**: An AI agent can read your source data dictionary and output the exact ADaM or SDTM YAML mapping specifications required to build compliant datasets, drastically reducing manual programming time.
 
 ## 📬 Connect with Me
