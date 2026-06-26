@@ -127,7 +127,7 @@ def odm_xml_to_df_dict(file_path: str | Path) -> pl.DataFrame:
     all_field_names = []
     for col in get_struct_columns(df):
         struct_dtype = df[col].dtype
-        all_field_names.extend(struct_dtype.to_schema().keys())  # pyre-ignore[16]
+        all_field_names.extend(struct_dtype.to_schema().keys())  # type: ignore
 
     # Identify duplicated field names
     duplicated_fields = {
@@ -138,7 +138,7 @@ def odm_xml_to_df_dict(file_path: str | Path) -> pl.DataFrame:
     struct_transformations = []
     for col in get_struct_columns(df):
         struct_dtype = df[col].dtype
-        original_fields = list(struct_dtype.to_schema().keys())
+        original_fields = list(struct_dtype.to_schema().keys())  # type: ignore
         new_field_names = []
 
         for field_name in original_fields:

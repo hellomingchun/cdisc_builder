@@ -140,10 +140,12 @@ class FunctionDerivation(BaseDerivation):
 
         try:
             spec = importlib.util.spec_from_file_location("functions", functions_path)
-            module = importlib.util.module_from_spec(spec)  # pyre-ignore[6]
-            sys.modules["functions"] = module
-            spec.loader.exec_module(module)  # pyre-ignore[16]
-            return hasattr(module, function_name)
+            if spec and spec.loader:
+                module = importlib.util.module_from_spec(spec)  # pyre-ignore[6]
+                sys.modules["functions"] = module
+                spec.loader.exec_module(module)
+                return hasattr(module, function_name)
+            return False
         except Exception as e:
             logger.debug(f"Failed to load functions.py: {e}")
             return False
@@ -157,9 +159,11 @@ class FunctionDerivation(BaseDerivation):
 
         try:
             spec = importlib.util.spec_from_file_location(function_name, func_file)
-            module = importlib.util.module_from_spec(spec)  # pyre-ignore[6]
-            spec.loader.exec_module(module)  # pyre-ignore[16]
-            return getattr(module, function_name)
+            if spec and spec.loader:
+                module = importlib.util.module_from_spec(spec)  # pyre-ignore[6]
+                spec.loader.exec_module(module)
+                return getattr(module, function_name)
+            return None
         except Exception as e:
             logger.debug(f"Failed to load {function_name}.py: {e}")
             return None

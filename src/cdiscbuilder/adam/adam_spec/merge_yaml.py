@@ -1,6 +1,6 @@
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Union
+from typing import Any, Union, Optional
 
 import yaml
 
@@ -8,7 +8,7 @@ import yaml
 def merge_yaml(
     paths: list[Union[str, Path]],
     list_merge_strategy: str = "replace",
-    list_merge_keys: dict[str, str] = None,  # pyre-ignore[9]
+    list_merge_keys: Optional[dict[str, str]] = None,  # pyre-ignore[9]
 ) -> dict[str, Any]:
     """
     Merge multiple YAML files in order with deep merging
@@ -41,7 +41,7 @@ def merge_yaml(
     def merge_lists(
         base_list: list,
         override_list: list,
-        key_field: str = None,  # pyre-ignore[9]
+        key_field: Optional[str] = None,  # pyre-ignore[9]
     ) -> list:
         """Merge two lists based on strategy"""
         if list_merge_strategy == "append":
@@ -91,7 +91,7 @@ def merge_yaml(
             return deepcopy(override)
 
     # Start with empty dict
-    merged = {}
+    merged: dict[str, Any] = {}
 
     # Merge each file in order
     for path in paths:

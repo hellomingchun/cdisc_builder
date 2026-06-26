@@ -5,7 +5,7 @@ Logging utilities for ADaM derivation audit trail
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any
+from typing import Any, Optional
 
 
 @dataclass
@@ -14,9 +14,9 @@ class DerivationLog:
 
     column: str
     method: str
-    source: str = None  # pyre-ignore[8]
+    source: Optional[str] = None  # pyre-ignore[8]
     records_affected: int = 0
-    error: str = None  # pyre-ignore[8]
+    error: Optional[str] = None  # pyre-ignore[8]
     timestamp: datetime = field(default_factory=datetime.now)
 
     def to_dict(self) -> dict[str, Any]:
@@ -51,7 +51,7 @@ class DerivationLogger:
         self,
         column: str,
         method: str,
-        source: str = None,  # pyre-ignore[9]
+        source: Optional[str] = None,  # pyre-ignore[9]
         records: int = 0,
     ):
         """Log successful derivation"""
@@ -62,7 +62,7 @@ class DerivationLogger:
         self.logger.info(f"Derived {column} using {method} from {source or 'constant'}")
 
     def log_error(
-        self, column: str, method: str, error: str, source: str = None
+        self, column: str, method: str, error: str, source: Optional[str] = None
     ):  # pyre-ignore[9]
         """Log derivation error"""
         log_entry = DerivationLog(

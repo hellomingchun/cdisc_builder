@@ -26,7 +26,7 @@ class AdamDerivation:
         self.sdtm_loader = SDTMLoader(self.spec.sdtm_dir)
         self.logger = logging.getLogger(__name__)
         self.target_df = pl.DataFrame()
-        self.source_data = {}
+        self.source_data: dict[str, pl.DataFrame] = {}
 
     def _build_keys(self) -> pl.DataFrame:
         """Build base dataset with key variables."""
@@ -153,16 +153,17 @@ class AdamDerivation:
                 return series.cast(pl.Utf8, strict=False)
             elif target_type == "bool":
                 if series.dtype == pl.Utf8:
-                    lower = series.str.to_lowercase()
-                    return (
-                        pl.when(lower.is_in(["true", "yes", "y", "1"]))
+                    expr = (
+                        pl.when(pl.col(series.name).str.to_lowercase().is_in(["true", "yes", "y", "1"]))
                         .then(True)
-                        .when(lower.is_in(["false", "no", "n", "0"]))
+                        .when(pl.col(series.name).str.to_lowercase().is_in(["false", "no", "n", "0"]))
                         .then(False)
                         .otherwise(None)
                     )
+                    return series.to_frame().select(expr.alias(series.name)).to_series()
                 else:
                     return series.cast(pl.Boolean, strict=False)
+            return series
         except Exception as e:
             self.logger.warning(
                 f"Type enforcement failed for {col_spec['name']} ({target_type}): {e}"
@@ -179,8 +180,12 @@ class AdamDerivation:
 
         self.target_df = self._build_keys()
 
+        specs = self.spec.get_column_specs()
+        if not isinstance(specs, list):
+            specs = [specs] if specs else []
+            
         # Derive each column
-        for col_spec in self.spec.get_column_specs():  # pyre-ignore[16]
+        for col_spec in specs:
             col_name = col_spec["name"]
 
             if col_name in self.spec.key or col_spec.get("drop"):

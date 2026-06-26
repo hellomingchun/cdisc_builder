@@ -669,8 +669,8 @@ class SchemaValidator:
             "any": object,
         }
 
-        expected_class = type_map.get(expected_type, object)
-        return isinstance(value, expected_class)  # pyre-ignore[6]
+        expected_class: type | tuple[type, ...] = type_map.get(expected_type, object)  # type: ignore
+        return isinstance(value, expected_class)
 
     def get_errors(self) -> list[ValidationResult]:
         """Get only error-level results"""
@@ -729,7 +729,7 @@ class SchemaValidator:
         lines.append("=" * 60)
 
         # Group results by field
-        by_field = {}
+        by_field: dict[str, list[ValidationResult]] = {}
         for result in self.results:
             if result.field not in by_field:
                 by_field[result.field] = []

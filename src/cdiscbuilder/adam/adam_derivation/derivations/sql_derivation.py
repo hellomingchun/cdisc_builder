@@ -296,7 +296,7 @@ class SQLDerivation(BaseDerivation):
 
         # Execute using Polars expressions
         ctx = pl.SQLContext(frame=self.target_df)
-        result_df = ctx.execute(f"SELECT {case_expr} as result FROM frame")
+        result_df = ctx.execute(f"SELECT {case_expr} as result FROM frame").collect()
         return result_df["result"]
 
     def _build_source_sql(

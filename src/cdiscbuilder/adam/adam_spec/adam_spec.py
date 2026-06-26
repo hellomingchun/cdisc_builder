@@ -115,9 +115,9 @@ class AdamSpec:
         self._raw_spec = final_spec
         self._extract_fields(final_spec)
 
-    def _collect_yaml_files(self, study_spec: dict) -> list[str]:
+    def _collect_yaml_files(self, study_spec: dict) -> list[str | Path]:
         """Collect YAML files including parents."""
-        yaml_files = []
+        yaml_files: list[str | Path] = []
         spec_dir = self.path.parent
 
         if "parents" in study_spec:
@@ -178,6 +178,9 @@ class AdamSpec:
 
     def _validate_with_schema(self) -> None:
         """Validate specification against schema."""
+        if not self.schema_path:
+            return
+
         try:
             validator = SchemaValidator(self.schema_path)
             self._schema_results = validator.validate(self._raw_spec)
