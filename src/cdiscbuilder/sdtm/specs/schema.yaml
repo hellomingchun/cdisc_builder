@@ -29,8 +29,11 @@ definitions:
       
       # Structural Metadata Properties
       label: {type: str}
+      role: {type: str}
       core: {type: str, enum: ["Req", "Exp", "Perm"]}
+      description: {type: str}
       origin: {type: str}
+      derivation_rule: {type: str}
       comments: {type: str}
       conversion: {type: str}
       supp:
@@ -68,8 +71,11 @@ definitions:
       
       # Structural Metadata Properties
       label: {type: str}
+      role: {type: str}
       core: {type: str, enum: ["Req", "Exp", "Perm"]}
+      description: {type: str}
       origin: {type: str}
+      derivation_rule: {type: str}
       comments: {type: str}
       conversion: {type: str}
       supp:
