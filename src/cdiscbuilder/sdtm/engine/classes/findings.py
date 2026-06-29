@@ -12,7 +12,7 @@ class FindingsProcessor(GeneralProcessor):
         super().__init__()
         self.class_name = "FINDINGS"
 
-    def process(self, domain_name, sources, df_long, default_keys, custom_to_standard=None, built_domains=None):
+    def process(self, domain_name, sources, df_long, default_keys, custom_to_standard=None, built_domains=None, form_mapping=None):
         domain_dfs = []
 
         # Pre-expand sources if they contain lists or observations
@@ -27,6 +27,9 @@ class FindingsProcessor(GeneralProcessor):
         for settings in expanded_sources:
             # 0. Filter by FormOID (optional but recommended)
             form_oid = settings.get("formoid")
+            if not form_oid and form_mapping and domain_name in form_mapping:
+                form_oid = form_mapping[domain_name]
+                
             source_df = df_long.copy()
             if form_oid:
                 if "FormOID" not in source_df.columns:

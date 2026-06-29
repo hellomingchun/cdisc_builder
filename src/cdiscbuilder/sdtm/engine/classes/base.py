@@ -7,7 +7,7 @@ class BaseProcessor(ABC):
         self.class_name = "GENERAL"
 
     @abstractmethod
-    def process(self, domain_name, sources, df_long, default_keys, built_domains=None):
+    def process(self, domain_name, sources, df_long, default_keys, custom_to_standard=None, built_domains=None, form_mapping=None):
         """Main entry point for processing a domain."""
         pass
 

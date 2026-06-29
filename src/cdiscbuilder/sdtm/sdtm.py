@@ -143,10 +143,13 @@ def create_sdtm_datasets(config_input, input_csv, output_dir):
         else:
             sources = [settings_entry]
 
+        form_mapping = defaults.get("form_mapping")
+
         result_df = process_domain(
             domain, sources, df_long, default_keys, output_dir,
             custom_to_standard=custom_to_standard,
             built_domains=built_domains,
+            form_mapping=form_mapping
         )
 
         if result_df is not None:

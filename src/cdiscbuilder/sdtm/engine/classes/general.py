@@ -171,7 +171,7 @@ class GeneralProcessor:
 
         return series, True
 
-    def process(self, domain_name, sources, df_long, default_keys, custom_to_standard=None, built_domains=None):
+    def process(self, domain_name, sources, df_long, default_keys, custom_to_standard=None, built_domains=None, form_mapping=None):
         domain_dfs = []
 
         # Pre-expand sources if they contain lists
@@ -186,6 +186,9 @@ class GeneralProcessor:
         for settings in expanded_sources:
             # 1. Filter by FormOID
             form_oid = settings.get("formoid")
+            if not form_oid and form_mapping and domain_name in form_mapping:
+                form_oid = form_mapping[domain_name]
+                
             if form_oid:
                 try:
                     if "FormOID" in df_long.columns:
@@ -204,10 +207,8 @@ class GeneralProcessor:
                     continue
             else:
                 if "FormOID" in df_long.columns:
-                    print(f"Warning: No formoid specified for a block in {domain_name}")
-                    continue
-                else:
-                    source_df = df_long.copy()
+                    print(f"Warning: No formoid specified for a block in {domain_name}. Processing all forms.")
+                source_df = df_long.copy()
 
             if source_df.empty:
                 continue

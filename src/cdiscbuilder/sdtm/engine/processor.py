@@ -119,7 +119,7 @@ def _build_supp_dataset(domain_name, parent_df, supp_config):
     return result
 
 
-def process_domain(domain_name, sources, df_long, default_keys, output_dir, custom_to_standard=None, built_domains=None):
+def process_domain(domain_name, sources, df_long, default_keys, output_dir, custom_to_standard=None, built_domains=None, form_mapping=None):
     # Normalize to list
     if isinstance(sources, dict):
         sources = [sources]
@@ -155,7 +155,7 @@ def process_domain(domain_name, sources, df_long, default_keys, output_dir, cust
     else:
         processor = GeneralProcessor()
 
-    domain_dfs = processor.process(domain_name, regular_sources, df_long, default_keys, custom_to_standard=custom_to_standard, built_domains=built_domains)
+    domain_dfs = processor.process(domain_name, regular_sources, df_long, default_keys, custom_to_standard=custom_to_standard, built_domains=built_domains, form_mapping=form_mapping)
 
     if not domain_dfs:
         print(f"Warning: No data found for domain {domain_name}")

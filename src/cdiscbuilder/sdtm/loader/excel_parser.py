@@ -26,11 +26,13 @@ def parse_excel_to_yaml_strings(excel_source):
         if sheet == 'Overview':
             continue
             
-        # Read the sheet with header on the 2nd row (index 1)
-        df = pd.read_excel(xl, sheet_name=sheet, header=1)
-        
-        # Skip if the dataframe has no data rows
-        if df.empty or len(df.dropna(subset=['Variable'])) == 0:
+        # Try with default header (0) first, then header=1
+        df = pd.read_excel(xl, sheet_name=sheet)
+        if 'Variable' not in df.columns:
+            df = pd.read_excel(xl, sheet_name=sheet, header=1)
+            
+        # Skip if the dataframe has no data rows or 'Variable' is still missing
+        if df.empty or 'Variable' not in df.columns or len(df.dropna(subset=['Variable'])) == 0:
             continue
             
         columns_dict = {}
@@ -49,6 +51,9 @@ def parse_excel_to_yaml_strings(excel_source):
             if clean_val(row.get('Description')): col_def['description'] = clean_val(row.get('Description'))
             if clean_val(row.get('Origin')): col_def['origin'] = clean_val(row.get('Origin'))
             if clean_val(row.get('Derivation Rule')): col_def['derivation_rule'] = clean_val(row.get('Derivation Rule'))
+            if clean_val(row.get('Source')): col_def['source'] = clean_val(row.get('Source'))
+            if clean_val(row.get('Literal')): col_def['literal'] = clean_val(row.get('Literal'))
+            if clean_val(row.get('Function')): col_def['function'] = clean_val(row.get('Function'))
             
             columns_dict[variable] = col_def
             
